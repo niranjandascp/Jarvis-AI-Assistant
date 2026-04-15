@@ -1,12 +1,11 @@
 import ollama
 import speech_recognition as sr
 import pyttsx3
-import time
+import threading
 
-# ---------------- JARVIS VOICE ENGINE ----------------
+# ---------------- VOICE ENGINE ----------------
 engine = pyttsx3.init()
-engine.setProperty('rate', 175)  # speed
-engine.setProperty('volume', 1.0)
+engine.setProperty('rate', 175)
 
 def speak(text):
     print("Jarvis:", text)
@@ -17,20 +16,20 @@ def speak(text):
 recognizer = sr.Recognizer()
 
 def listen():
-    with sr.Microphone() as source:
-        print("🎤 Listening...")
-        recognizer.adjust_for_ambient_noise(source)
-        audio = recognizer.listen(source)
-
     try:
+        with sr.Microphone() as source:
+            print("🎤 Listening...")
+            recognizer.adjust_for_ambient_noise(source, duration=1)
+            audio = recognizer.listen(source, timeout=6)
+
         text = recognizer.recognize_google(audio)
-        print("You:", text)
+        print("You (voice):", text)
         return text.lower()
+
     except:
-        speak("I didn't catch that.")
         return ""
 
-# ---------------- AI RESPONSE (OLLAMA) ----------------
+# ---------------- AI BRAIN ----------------
 def ask_ai(prompt):
     response = ollama.chat(
         model="llama3",
@@ -38,19 +37,30 @@ def ask_ai(prompt):
     )
     return response['message']['content']
 
+# ---------------- INPUT HANDLER ----------------
+def get_input():
+    mode = input("\nType or say (t/v): ").lower()
+
+    if mode == "v":
+        return listen()
+    else:
+        return input("You (text): ").lower()
+
 # ---------------- MAIN LOOP ----------------
-speak("Jarvis system activated.")
+speak("Jarvis hybrid system activated.")
 
 while True:
-    command = listen()
+    command = get_input()
 
-    if command == "":
+    if not command:
         continue
 
     if "stop" in command or "exit" in command:
         speak("Shutting down system.")
         break
 
+    print("Processing:", command)
+
     reply = ask_ai(command)
+
     speak(reply)
-    time.sleep(0.5)

@@ -1,14 +1,18 @@
-import sounddevice as sd
-import wavio
+import speech_recognition as sr
 
-fs = 44100
-seconds = 5
+r = sr.Recognizer()
 
-print("🎤 Recording for 5 seconds...")
+with sr.Microphone() as source:
+    print("🎤 Say something...")
+    r.adjust_for_ambient_noise(source, duration=1)
+    audio = r.listen(source)
 
-recording = sd.rec(int(seconds * fs), samplerate=fs, channels=1)
-sd.wait()
+try:
+    text = r.recognize_google(audio)
+    print("You said:", text)
 
-wavio.write("output.wav", recording, fs, sampwidth=2)
+except sr.UnknownValueError:
+    print("❌ Could not understand audio")
 
-print("✅ Recording saved as output.wav")
+except sr.RequestError as e:
+    print("❌ API error:", e)
