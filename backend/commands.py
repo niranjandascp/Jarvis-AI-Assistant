@@ -1,25 +1,28 @@
 import os
 import webbrowser
 import psutil
+from datetime import datetime
 
 def run_command(text):
-
     text = text.lower()
 
-    # 🌐 WEB
-    if "open youtube" in text:
-        webbrowser.open("https://youtube.com")
-        return "Opening YouTube"
-
-    if "open google" in text:
-        webbrowser.open("https://google.com")
-        return "Opening Google"
+    # 🌐 WEB COMMANDS
+    web_map = {
+        "open youtube": "https://youtube.com",
+        "open google": "https://google.com",
+        "open github": "https://github.com",
+        "open stack overflow": "https://stackoverflow.com"
+    }
+    
+    for cmd, url in web_map.items():
+        if cmd in text:
+            webbrowser.open(url)
+            return f"Opening {cmd.split()[-1].capitalize()}"
 
     # 💻 APPS
     if "open notepad" in text:
-        os.system("notepad")
+        os.system("start notepad") # 'start' prevents the script from freezing
         return "Opening Notepad"
-
     if "open calculator" in text:
         os.system("calc")
         return "Opening Calculator"
@@ -27,9 +30,12 @@ def run_command(text):
     # ⚙️ SYSTEM INFO
     if "battery" in text:
         battery = psutil.sensors_battery()
-        return f"Battery is at {battery.percent}%"
+        return f"Battery is at {battery.percent}%" if battery else "Battery info unavailable."
 
     if "cpu usage" in text:
-        return f"CPU usage is {psutil.cpu_percent()}%"
+        return f"Current CPU usage is {psutil.cpu_percent()}%"
+
+    if "time" in text:
+        return f"The time is {datetime.now().strftime('%I:%M %p')}"
 
     return None

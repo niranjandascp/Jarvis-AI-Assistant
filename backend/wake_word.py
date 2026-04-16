@@ -1,28 +1,20 @@
-import pvporcupine
-import pyaudio
-import struct
+import speech_recognition as sr
 
 def detect_wake_word():
-    porcupine = pvporcupine.create(keywords=["jarvis"])
-
-    pa = pyaudio.PyAudio()
-
-    stream = pa.open(
-        rate=porcupine.sample_rate,
-        channels=1,
-        format=pyaudio.paInt16,
-        input=True,
-        frames_per_buffer=porcupine.frame_length
-    )
-
-    print("🎧 Listening for 'Jarvis'...")
-
-    while True:
-        pcm = stream.read(porcupine.frame_length)
-        pcm = struct.unpack_from("h" * porcupine.frame_length, pcm)
-
-        result = porcupine.process(pcm)
-
-        if result >= 0:
-            print("🧠 WAKE WORD DETECTED")
-            return True
+    recognizer = sr.Recognizer()
+    
+    with sr.Microphone() as source:
+        print("🎧 Waiting for 'Jarvis'...")
+        recognizer.adjust_for_ambient_noise(source, duration=0.5)
+        
+        while True:
+            try:
+                audio = recognizer.listen(source, timeout=None, phrase_time_limit=2)
+                text = recognizer.recognize_google(audio).lower()
+                
+                if "jarvis" in text:
+                    print("🧠 WAKE WORD DETECTED")
+                    return True
+            except:
+                # Ethu error vannalum loop continue cheyyaan (Shabdam onnum kettillengil)
+                continue

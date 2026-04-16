@@ -1,127 +1,99 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import logo from "./logo.svg";
 import "./App.css";
 
 function App() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
   const [listening, setListening] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const chatEndRef = useRef(null);
 
-  // 🧠 TEXT CHAT
+  // Auto scroll logic
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // 🔴 SYNC WITH BACKEND: Voice engine vazhi varunnu updates screen-il kaanan
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const res = await axios.get("http://127.0.0.1:5000/history");
+        // Only update if the length changed to avoid flickering
+        if (res.data.length !== messages.length) {
+          setMessages(res.data);
+        }
+      } catch (err) {
+        console.error("History fetch failed. Check if Flask is running.");
+      }
+    };
+
+    const interval = setInterval(fetchHistory, 1000);
+    return () => clearInterval(interval);
+  }, [messages.length]);
+
   const sendMessage = async () => {
-    if (!input) return;
-
-    const res = await axios.post("http://127.0.0.1:5000/chat", {
-      message: input,
-    });
-
-    setMessages((prev) => [
-      ...prev,
-      { role: "user", text: input },
-      { role: "jarvis", text: res.data.reply },
-    ]);
-
+    if (!input || loading) return;
+    const userText = input;
     setInput("");
+    setLoading(true);
 
-    // 🗣️ Speak response
-    const speech = new SpeechSynthesisUtterance(res.data.reply);
-    speech.rate = 1;
-    speech.pitch = 1;
-    window.speechSynthesis.speak(speech);
+    try {
+      // Backend handles memory now, so we just POST
+      await axios.post("http://127.0.0.1:5000/chat", { message: userText });
+    } catch (err) {
+      console.error("Send failed");
+    }
+    setLoading(false);
   };
 
-  // 🎤 VOICE INPUT
   const startVoice = () => {
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
-
-    if (!SpeechRecognition) {
-      alert("Speech Recognition not supported in this browser");
-      return;
-    }
-
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return alert("Mic not supported in this environment.");
+    
     const recognition = new SpeechRecognition();
-
-    recognition.lang = "en-US";
     recognition.start();
-
     setListening(true);
 
     recognition.onresult = async (event) => {
       const voiceText = event.results[0][0].transcript;
+      setLoading(true);
       setListening(false);
-
-      const res = await axios.post("http://127.0.0.1:5000/chat", {
-        message: voiceText,
-      });
-
-      setMessages((prev) => [
-        ...prev,
-        { role: "user", text: voiceText },
-        { role: "jarvis", text: res.data.reply },
-      ]);
-
-      // 🗣️ Speak response
-      const speech = new SpeechSynthesisUtterance(res.data.reply);
-      speech.rate = 1;
-      speech.pitch = 1;
-      window.speechSynthesis.speak(speech);
+      try {
+        await axios.post("http://127.0.0.1:5000/chat", { message: voiceText });
+      } catch (err) { console.error(err); }
+      setLoading(false);
     };
   };
 
   return (
-    <div className="App" style={{ background: "#000", color: "#fff", height: "100vh" }}>
-      
-      {/* HEADER */}
-      <header className="App-header" style={{ padding: 20 }}>
-        <img src={logo} className="App-logo" alt="logo" />
+    <div className="app-container">
+      <div className="reactor-container">
+        <div className={`arc-reactor ${loading ? "active" : ""}`}></div>
+        <h2 className="glitch-text">MOLTBOT AI</h2>
+      </div>
 
-        <h2>🧠 JARVIS AI</h2>
+      <div id="chat-container">
+        {messages.map((msg, index) => (
+          <div key={index} className={`message ${msg.role === "user" ? "user-msg" : "jarvis-msg"}`}>
+            {msg.text}
+          </div>
+        ))}
+        {loading && <div className="thinking">🧠 Analysing...</div>}
+        <div ref={chatEndRef} />
+      </div>
 
-        {/* CHAT BOX */}
-        <div
-          style={{
-            width: "80%",
-            height: "50vh",
-            overflowY: "auto",
-            border: "1px solid gray",
-            padding: 10,
-            marginTop: 20,
-          }}
-        >
-          {messages.map((m, i) => (
-            <p key={i}>
-              <b>{m.role}:</b> {m.text}
-            </p>
-          ))}
-        </div>
-
-        {/* INPUT AREA */}
-        <div style={{ marginTop: 20, display: "flex", gap: 10 }}>
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            style={{ padding: 10, width: "60%" }}
-            placeholder="Ask Jarvis..."
-          />
-
-          <button onClick={sendMessage} style={{ padding: 10 }}>
-            Send
-          </button>
-
-          <button
-            onClick={startVoice}
-            style={{
-              padding: 10,
-              background: listening ? "red" : "green",
-              color: "white",
-            }}
-          >
-            🎤 {listening ? "Listening..." : "Speak"}
-          </button>
-        </div>
-      </header>
+      <div className="input-area">
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyPress={(e) => e.key === "Enter" && sendMessage()}
+          placeholder="Command me, Sir..."
+        />
+        <button onClick={startVoice} className={listening ? "listening-btn" : ""}>
+          {listening ? "🛑" : "🎤"}
+        </button>
+      </div>
     </div>
   );
 }
