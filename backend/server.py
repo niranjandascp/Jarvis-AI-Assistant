@@ -1,54 +1,42 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS
+from flask_cors import CORS  # Ensure you ran: pip install flask-cors
 from commands import run_command
 from brain import ask_ai
 
 app = Flask(__name__)
-CORS(app)
+# This allows ANY frontend to talk to this backend
+CORS(app) 
 
-# React-inu vendi memory format onnu maatti
-memory = [{"role": "jarvis", "text": "Systems Online, Sir."}]
-MAX_MEMORY = 10 
+memory = []
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    data = request.get_json()
-    user_msg = data.get("message", "")
-
-    # 1. Update memory with user message
-    memory.append({"role": "user", "text": user_msg})
-
-    # 2. Check for hard-coded commands
-    cmd_reply = run_command(user_msg)
-    if cmd_reply:
-        memory.append({"role": "jarvis", "text": cmd_reply})
-        return jsonify({"reply": cmd_reply})
-
-    # 3. AI logic
     try:
-        # Brain expects a specific format, so we pass it carefully
-        ai_memory = [{"role": m["role"], "content": m["text"]} for m in memory]
-        reply = ask_ai(user_msg, ai_memory)
+        data = request.get_json()
+        user_msg = data.get("message", "")
+
+        # 1. Check for commands
+        cmd_reply = run_command(user_msg)
+        if cmd_reply:
+            return jsonify({"reply": cmd_reply})
+
+        # 2. Ask the AI
+        reply = ask_ai(user_msg, memory)
         
-        memory.append({"role": "jarvis", "text": reply})
+        # Update memory
+        memory.append({"role": "user", "content": user_msg})
+        memory.append({"role": "assistant", "content": reply})
         
-        # Keep memory clean
-        if len(memory) > MAX_MEMORY * 2:
-            memory.pop(1) # Keep "Systems Online" message, pop others
-            memory.pop(1)
+        if len(memory) > 10:
+            memory.pop(0)
+            memory.pop(0)
 
         return jsonify({"reply": reply})
 
     except Exception as e:
         print(f"Error: {e}")
-        error_msg = "I encountered a glitch, Sir."
-        memory.append({"role": "jarvis", "text": error_msg})
-        return jsonify({"reply": error_msg})
-
-# 🔴 ITHU ADD CHEYYUKA: Frontend-inu data edukkan vendi
-@app.route("/history", methods=["GET"])
-def get_history():
-    return jsonify(memory)
+        return jsonify({"reply": "I encountered a glitch, Sir."})
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    # Change host to 127.0.0.1 to match your terminal exactly
+    app.run(host="127.0.0.1", port=5000, debug=True)

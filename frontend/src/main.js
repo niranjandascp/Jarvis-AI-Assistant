@@ -1,38 +1,45 @@
-const { app, BrowserWindow } = require("electron");
-const path = require("path");
+const { app, BrowserWindow } = require('electron');
+const path = require('path');
 
 function createWindow() {
-  const win = new BrowserWindow({
-    width: 450,
-    height: 700,
-    // frame: false,  <-- Ippo ithu comment cheyyu, window control cheyyaan eluppathinu
-    webPreferences: {
-        nodeIntegration: true,
-        contextIsolation: false,
-        // 🔴 ITHU ADD CHEYYUKA
-        permissions: ['microphone'] 
-    },
-    backgroundColor: "#0a0a0a",
-  });
+    // Create the browser window.
+    const win = new BrowserWindow({
+        width: 450,
+        height: 700,
+        backgroundColor: '#0a0a0a',
+        webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: false
+        }
+    });
 
-  // 🔴 ITHU ADD CHEYYUKA: Window load aayi kazhinju maathram show cheyyaan
-  win.webContents.on("did-fail-load", () => {
-    console.log("React server kittiilla! URL onnu check cheyyu.");
-    win.loadURL("http://localhost:3000");
-  });
+    // Load the React app from the local dev server
+    win.loadURL('http://localhost:3000');
 
-  // DevTools thurakkaam error enthaanennu ariyan
-  win.webContents.openDevTools();
+    // Optional: Open DevTools automatically to see errors
+    // win.webContents.openDevTools();
 
-  win.loadURL("http://localhost:3000");
+    // Handle cases where the React server isn't ready yet
+    win.webContents.on('did-fail-load', () => {
+        console.log("React server not found, retrying in 2s...");
+        setTimeout(() => {
+            win.loadURL('http://localhost:3000');
+        }, 2000);
+    });
+}
 
-  const { session } = require('electron');
-session.defaultSession.setPermissionCheckHandler((webContents, permission) => {
-    if (permission === 'media') return true;
-    return false;
-});
+// This method will be called when Electron has finished initialization
 app.whenReady().then(createWindow);
 
-app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") app.quit();
+// Quit when all windows are closed, except on macOS
+app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') {
+        app.quit();
+    }
+});
+
+app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+        createWindow();
+    }
 });
