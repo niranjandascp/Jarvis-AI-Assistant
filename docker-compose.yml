@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  # --- JARVIS NEURAL BACKEND ---
+  jarvis-backend:
+    build: ./backend
+    container_name: jarvis-neural-core
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: always
+
+  # --- JARVIS UI ENGINE ---
+  jarvis-frontend:
+    build: ./frontend
+    container_name: jarvis-ui-engine
+    ports:
+      - "3000:80" # Map host 3000 to nginx 80
+    depends_on:
+      - jarvis-backend
+    restart: always
+
+networks:
+  default:
+    name: jarvis-net
