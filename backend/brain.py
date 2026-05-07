@@ -1,5 +1,6 @@
 import ollama
 import sys
+from .settings import settings_manager
 
 def ask_ai(prompt, history):
     """
@@ -7,13 +8,14 @@ def ask_ai(prompt, history):
     Handles communication with local Ollama Llama3 model.
     """
     try:
-        # history comes from memory_manager.get_memory(limit=10)
-        # It's a list of dictionaries with 'role' and 'content'
-        
+        # Load dynamic settings
+        model = settings_manager.get("model", "llama3")
+        sys_prompt = settings_manager.get("system_prompt", "You are Jarvis, an advanced AI assistant created by Tony Stark. Be helpful, concise, and professional.")
+
         response = ollama.chat(
-            model="llama3",
+            model=model,
             messages=[
-                {"role": "system", "content": "You are Jarvis, an advanced AI assistant created by Tony Stark. Be helpful, concise, and professional."},
+                {"role": "system", "content": sys_prompt},
                 *history,
                 {"role": "user", "content": prompt}
             ]
@@ -39,10 +41,13 @@ def stream_ai(prompt, history):
     Yields chunks of the AI response in real-time.
     """
     try:
+        model = settings_manager.get("model", "llama3")
+        sys_prompt = settings_manager.get("system_prompt", "You are Jarvis, an advanced AI assistant created by Tony Stark. Be helpful, concise, and professional.")
+
         stream = ollama.chat(
-            model="llama3",
+            model=model,
             messages=[
-                {"role": "system", "content": "You are Jarvis, an advanced AI assistant created by Tony Stark. Be helpful, concise, and professional."},
+                {"role": "system", "content": sys_prompt},
                 *history,
                 {"role": "user", "content": prompt}
             ],

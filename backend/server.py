@@ -3,7 +3,8 @@ from flask_cors import CORS
 from commands import run_command
 from brain import ask_ai, stream_ai
 import memory
-from memory import memory_manager
+from settings import settings_manager
+import memory # Import the module first
 import pyttsx3
 import threading
 import sys
@@ -102,10 +103,26 @@ def status():
     return jsonify({
         "status": "online",
         "system": "JARVIS",
-        "neural_bank": memory_manager.filepath,
-        "history_depth": len(memory_manager.memory),
-        "module_loc": memory.__file__
+        "model": settings_manager.get("model"),
+        "history_depth": len(memory_manager.memory)
     })
+
+@app.route("/get-settings", methods=["GET"])
+def get_settings():
+    return jsonify(settings_manager.settings)
+
+@app.route("/set-model", methods=["POST"])
+def set_model():
+    try:
+        data = request.get_json()
+        new_model = data.get("model")
+        if not new_model:
+            return jsonify({"error": "No model specified"}), 400
+        
+        settings_manager.set("model", new_model)
+        return jsonify({"ok": True, "model": new_model})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     from waitress import serve
