@@ -6,26 +6,34 @@ import "./App.css";
 
 function App() {
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState([{ role: "jarvis", text: "Systems Online, Sir. How may I assist you today?" }]);
+  const [messages, setMessages] = useState([{ role: "jarvis", text: "Long-term Memory Synced. Systems Online, Sir." }]);
   const [loading, setLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [useServerVoice, setUseServerVoice] = useState(false);
   const [systemReady, setSystemReady] = useState(false);
   const chatEndRef = useRef(null);
 
+  // Voice Recognition Setup
+  const recognitionRef = useRef(null);
+
   useEffect(() => {
-    // Robust startup sequence
-    const timer = setTimeout(() => {
-        setSystemReady(true);
-    }, 3500); // Fail-safe: Always show UI after 3.5s
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.lang = "en-US";
+      recognitionRef.current.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setInput(transcript);
+        sendMessage(transcript);
+      };
+      recognitionRef.current.onend = () => setIsListening(false);
+      recognitionRef.current.onerror = () => setIsListening(false);
+    }
 
+    const timer = setTimeout(() => setSystemReady(true), 3500);
     const tl = gsap.timeline();
-    tl.to(".loading-overlay", { 
-        opacity: 0, 
-        duration: 1.5, 
-        delay: 2, 
-        ease: "power2.inOut",
-        onComplete: () => setSystemReady(true) 
-    });
-
+    tl.to(".loading-overlay", { opacity: 0, duration: 1.5, delay: 2, ease: "power2.inOut", onComplete: () => setSystemReady(true) });
     return () => clearTimeout(timer);
   }, []);
 
@@ -33,59 +41,74 @@ function App() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const sendMessage = async () => {
-    if (!input || loading) return;
+  const toggleListening = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+    } else {
+      setIsListening(true);
+      recognitionRef.current?.start();
+    }
+  };
 
-    const userText = input;
+  const sendMessage = async (textOverride = null) => {
+    const messageText = textOverride || input;
+    if (!messageText || loading) return;
+
     setInput("");
     setLoading(true);
 
-    setMessages((prev) => [...prev, { role: "user", text: userText }]);
-    
-    gsap.to(".three-container", { scale: 1.1, duration: 0.2, yoyo: true, repeat: 1 });
+    // 1. Update UI
+    setMessages((prev) => [...prev, { role: "user", text: messageText }]);
+    gsap.to(".three-container", { scale: 1.15, duration: 0.2, yoyo: true, repeat: 1 });
 
     try {
-      const res = await axios.post("http://127.0.0.1:5000/chat", { message: userText });
-      const reply = res.data.reply;
+      // 2. Call Backend
+      const res = await axios.post("http://127.0.0.1:5000/chat", { 
+        message: messageText,
+        use_server_voice: useServerVoice 
+      });
       
+      const reply = res.data.reply;
       setMessages((prev) => [...prev, { role: "jarvis", text: reply }]);
       
-      const speech = new SpeechSynthesisUtterance(reply);
-      speech.rate = 1.1;
-      window.speechSynthesis.speak(speech);
+      // 3. Handle Voice Output
+      if (!useServerVoice) {
+        const speech = new SpeechSynthesisUtterance(reply);
+        speech.rate = 1.0;
+        speech.pitch = 0.9;
+        window.speechSynthesis.speak(speech);
+      }
 
     } catch (err) {
-      setMessages((prev) => [...prev, { role: "jarvis", text: "⚠️ SYSTEM ERROR: Neural Backend Link Severed." }]);
+      console.error("Connection Error:", err);
+      setMessages((prev) => [...prev, { role: "jarvis", text: "⚠️ CRITICAL: Neural Backend Link Severed. Ensure server is running on port 5000." }]);
     }
     setLoading(false);
   };
 
   return (
     <div className="main-wrapper">
-      {/* Loading Overlay remains until systemReady */}
       {!systemReady && (
         <div className="loading-overlay">
           <div className="loader-content">
-             <div className="spinner-outer">
-                <div className="spinner-inner"></div>
-             </div>
-             <p className="loading-text">DECRYPTING MOLTBOT OS...</p>
-             <div className="progress-bar-container">
-                <div className="progress-bar-fill"></div>
-             </div>
+             <div className="spinner-outer"><div className="spinner-inner"></div></div>
+             <p className="loading-text">RECALIBRATING NEURAL MEMORY...</p>
+             <div className="progress-bar-container"><div className="progress-bar-fill"></div></div>
           </div>
         </div>
       )}
 
-      {/* Main App Container - always rendered but hidden by overlay */}
       <div className={`app-container ${systemReady ? 'visible' : 'hidden'}`}>
         <header className="app-header">
            <div className="status-indicator">
-              <span className="dot pulse"></span>
-              <span className="status-text">ENCRYPTED LINK ACTIVE</span>
+              <span className={`dot ${loading ? 'busy' : 'pulse'}`}></span>
+              <span className="status-text">{loading ? "ANALYZING..." : "MEMORY SYNCED"}</span>
            </div>
-           <div className="drag-handle">MOLTBOT v1.0.4</div>
-           <div className="window-controls">
+           <div className="drag-handle">MOLTBOT v1.0.6 - MEMORY ACTIVE</div>
+           <div className="header-actions">
+              <button className={`server-voice-btn ${useServerVoice ? 'active' : ''}`} onClick={() => setUseServerVoice(!useServerVoice)}>
+                {useServerVoice ? "🔊 SERVER" : "🔈 BROWSER"}
+              </button>
               <button className="ctrl-btn" onClick={() => window.close()}>×</button>
            </div>
         </header>
@@ -93,9 +116,9 @@ function App() {
         <div className="content-grid">
             <div className="left-panel">
                 <div className="reactor-section">
-                    <Visualizer active={loading} />
+                    <Visualizer active={loading || isListening} />
                     <h1 className="glitch-text" data-text="MOLTBOT">MOLTBOT</h1>
-                    <p className="subtitle">ADVANCED NEURAL INTERFACE</p>
+                    <p className="subtitle">PERSISTENT MEMORY MODULE</p>
                 </div>
             </div>
 
@@ -103,39 +126,28 @@ function App() {
                 <div id="chat-container">
                     {messages.map((msg, index) => (
                         <div key={index} className={`message-wrapper ${msg.role}`}>
-                            <div className="message-header">
-                                {msg.role === "user" ? "AUTHORIZATION: USER" : "SOURCE: JARVIS"}
-                            </div>
-                            <div className="message-content">
-                                {msg.text}
-                            </div>
+                            <div className="message-header">{msg.role === "user" ? "USER_ID: AUTHORIZED" : "JARVIS: CORE_MEMORY"}</div>
+                            <div className="message-content">{msg.text}</div>
                         </div>
                     ))}
-                    {loading && (
-                        <div className="thinking-indicator">
-                            <span className="typing-dot"></span>
-                            <span className="typing-dot"></span>
-                            <span className="typing-dot"></span>
-                        </div>
-                    )}
+                    {loading && <div className="thinking-indicator"><span className="typing-dot"></span><span className="typing-dot"></span><span className="typing-dot"></span></div>}
                     <div ref={chatEndRef} />
                 </div>
 
                 <div className="input-section">
                     <div className="input-wrapper">
+                        <button className={`voice-btn ${isListening ? 'active' : ''}`} onClick={toggleListening}>
+                            {isListening ? "🟢" : "🎤"}
+                        </button>
                         <input
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             onKeyPress={(e) => e.key === "Enter" && sendMessage()}
-                            placeholder="Enter system command..."
+                            placeholder={isListening ? "Listening..." : "Query the neural network..."}
                             autoFocus
                         />
-                        <button 
-                            className={`send-btn ${loading ? 'busy' : ''}`} 
-                            onClick={sendMessage} 
-                            disabled={loading}
-                        >
-                            {loading ? "PROCESS" : "EXECUTE"}
+                        <button className={`send-btn ${loading ? 'busy' : ''}`} onClick={() => sendMessage()} disabled={loading}>
+                            {loading ? "SYNC" : "EXECUTE"}
                         </button>
                     </div>
                 </div>
