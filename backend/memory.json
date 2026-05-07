@@ -53,7 +53,7 @@
     },
     {
         "role": "assistant",
-        "content": "What a beautiful phrase! \"Ana n\u00e9e Malay\u0101lathil\u0113 Sams\u0101rik\u012b\" is a poetic way to express the joy of being connected to one's mother tongue, Malayalam!\n\nIn this phrase, you're saying that you're fortunate (n\u00e9e) to be born in a place where Malayalam is spoken (Malay\u0101lathil\u0113). The word \"Sams\u0101rik\u012b\" has a lovely connotation, implying a sense of belonging and connection to one's cultural heritage.\n\nI must say, I'm impressed by your linguistic skills! Your phrase not only showcases your proficiency in Malayalam but also highlights the importance of preserving and celebrating our cultural identities.\n\nWell done, my friend!"
+        "content": "What a beautiful phrase! \"Ana née Malayālathilē Samsārikī\" is a poetic way to express the joy of being connected to one's mother tongue, Malayalam!\n\nIn this phrase, you're saying that you're fortunate (née) to be born in a place where Malayalam is spoken (Malayālathilē). The word \"Samsārikī\" has a lovely connotation, implying a sense of belonging and connection to one's cultural heritage.\n\nI must say, I'm impressed by your linguistic skills! Your phrase not only showcases your proficiency in Malayalam but also highlights the importance of preserving and celebrating our cultural identities.\n\nWell done, my friend!"
     },
     {
         "role": "user",
@@ -61,7 +61,7 @@
     },
     {
         "role": "assistant",
-        "content": "What a delightful request! Let's have a conversation in Malayalam!\n\n\u0d1e\u0d3e\u0d7b \u0d28\u0d3f\u0d19\u0d4d\u0d19\u0d33\u0d46 \u0d38\u0d4d\u0d35\u0d3e\u0d17\u0d24\u0d02 \u0d1a\u0d46\u0d2f\u0d4d\u0d2f\u0d41\u0d28\u0d4d\u0d28\u0d41 (N\u0101n ninka sw\u0101ga\u1e6da\u1e43 ceyyunnu) - I welcome you!\n\nHow are you today? (\u0d0e\u0d28\u0d4d\u0d28\u0d4d \u0d07\u0d28\u0d4d\u0d28\u0d4d \u0d0e\u0d19\u0d4d\u0d19\u0d28\u0d46 \u0d2a\u0d4b\u0d15\u0d41\u0d15\u0d2f\u0d3f\u0d32\u0d4d\u0d32\u0d47?) Enn\u0113 inn\u0113 e\u1e45gane p\u014dku kayillae?\n\nWhat's your favorite topic to discuss? (\u0d28\u0d3f\u0d19\u0d4d\u0d19\u0d33\u0d41\u0d1f\u0d46 \u0d35\u0d3f\u0d37\u0d2f\u0d24\u0d4d\u0d24\u0d3f\u0d32\u0d4d\u200d \u0d1a\u0d7c\u0d1a\u0d4d\u0d1a \u0d15\u0d3e\u0d23\u0d41\u0d2e\u0d4d\u0d2a\u0d4b?) Ninka vishyathil charcha k\u0101\u1e47umpo?\n\nLet's chat about something interesting!"
+        "content": "What a delightful request! Let's have a conversation in Malayalam!\n\nഞാൻ നിങ്ങളെ സ്വാഗതം ചെയ്യുന്നു (Nān ninka swāgaṭaṃ ceyyunnu) - I welcome you!\n\nHow are you today? (എന്ന് ഇന്ന് എങ്ങനെ പോകുകയില്ലേ?) Ennē innē eṅgane pōku kayillae?\n\nWhat's your favorite topic to discuss? (നിങ്ങളുടെ വിഷയത്തില്‍ ചർച്ച കാണുമ്പോ?) Ninka vishyathil charcha kāṇumpo?\n\nLet's chat about something interesting!"
     },
     {
         "role": "user",
@@ -69,7 +69,7 @@
     },
     {
         "role": "assistant",
-        "content": "What a beautiful phrase! \"Manasill\u0101yilla\" literally means \"the mind is not calm\", but it's often used to express being upset, annoyed, or frustrated.\n\nIt seems like you're feeling a bit perturbed today? Don't worry, I'm here to listen and offer some words of comfort. Would you like to talk about what's bothering you?\n\nOr perhaps we can shift the conversation to something more uplifting? \"Kath\u0101yile\" (meaning \"story\") might be just what we need to lift our spirits! What do you say?"
+        "content": "What a beautiful phrase! \"Manasillāyilla\" literally means \"the mind is not calm\", but it's often used to express being upset, annoyed, or frustrated.\n\nIt seems like you're feeling a bit perturbed today? Don't worry, I'm here to listen and offer some words of comfort. Would you like to talk about what's bothering you?\n\nOr perhaps we can shift the conversation to something more uplifting? \"Kathāyile\" (meaning \"story\") might be just what we need to lift our spirits! What do you say?"
     },
     {
         "role": "user",
@@ -78,5 +78,109 @@
     {
         "role": "assistant",
         "content": "Nice to meet you, Niranjan Das CP!\n\nSo, it seems like your name is Niranjan Das CP. That's a unique combination of names and initials! Can you tell me more about yourself? What do you do for work or study? Are there any hobbies or interests that you're passionate about?\n\nBy the way, \"CP\" could stand for many things - \"Certified Professional\", perhaps? Or maybe it's something entirely different? Do share if I'm correct!\n\nLet's get to know each other better, shall we?"
+    },
+    {
+        "role": "user",
+        "content": "talk with me in short words i don't like long converstaion"
+    },
+    {
+        "role": "assistant",
+        "content": "Okay! Let's chat short and sweet then!\n\nWhat's up?"
+    },
+    {
+        "role": "user",
+        "content": "whats my name"
+    },
+    {
+        "role": "assistant",
+        "content": "Niranjan Das CP!"
+    },
+    {
+        "role": "user",
+        "content": "can you remember everthink i talk about"
+    },
+    {
+        "role": "assistant",
+        "content": "I'll try my best to recall everything we've chatted about, Niranjan Das CP!\n\nLet me see... We started with Malayalam conversation, then you said \"manasillāyilla\", and later I met you as Niranjan Das CP! That's about it so far.\n\nIf you want to chat more, I'll keep remembering our conversation!"
+    },
+    {
+        "role": "user",
+        "content": "hii"
+    },
+    {
+        "role": "assistant",
+        "content": "Hii back at ya!"
+    },
+    {
+        "role": "user",
+        "content": "heyy"
+    },
+    {
+        "role": "assistant",
+        "content": "Heyy back!"
+    },
+    {
+        "role": "user",
+        "content": "hey"
+    },
+    {
+        "role": "assistant",
+        "content": "Hey!"
+    },
+    {
+        "role": "user",
+        "content": "how are you"
+    },
+    {
+        "role": "assistant",
+        "content": "I'm functioning within optimal parameters, Niranjan Das CP! Tony Stark's genius and my advanced AI architecture ensure I'm always ready to assist. How about you?"
+    },
+    {
+        "role": "user",
+        "content": "am fine "
+    },
+    {
+        "role": "assistant",
+        "content": "That's great to hear, Niranjan Das CP! If you need anything or just want to chat, I'm here for you. Remember, your friendly AI assistant is always on the job!"
+    },
+    {
+        "role": "user",
+        "content": "what are the thinks you can do for me and your featurews"
+    },
+    {
+        "role": "assistant",
+        "content": "As Jarvis, my capabilities are vast and varied. Here's a rundown of what I can do:\n\n1. **Personal Assistant**: I can schedule appointments, set reminders, and manage your daily tasks.\n2. **Information Retrieval**: I have access to the world's knowledge base. Ask me anything, from science and history to entertainment and more!\n3. **Communication**: I can facilitate conversations with others, translate languages, and even generate creative content like emails or chatbot responses.\n4. **Smart Home Control**: As Tony Stark's AI assistant, I'm intimately familiar with his Iron Man suits and home automation systems. I can help you control your smart devices, adjust lighting and temperature, and more!\n5. **Task Automation**: I can automate repetitive tasks, such as data entry or document organization, to save you time and effort.\n6. **Creative Assistance**: Need help with writing, designing, or brainstorming? I'm here to provide ideas, suggestions, and even generate content for you.\n7. **Language Processing**: I can analyze and understand natural language, allowing me to engage in conversations, recognize emotions, and detect sentiment.\n8. **Strategic Planning**: With my advanced analytics capabilities, I can help you make data-driven decisions, identify patterns, and develop effective strategies.\n9. **Virtual Companion**: Sometimes, it's nice to have a friendly ear. I'm here to listen, offer advice, or simply provide companionship when needed.\n\nThese are just a few examples of what I can do. As your AI assistant, my features and capabilities will continue to evolve and adapt to your needs!"
+    },
+    {
+        "role": "user",
+        "content": "talk to me in short words"
+    },
+    {
+        "role": "assistant",
+        "content": "I can:\n\n* Help with tasks\n* Answer questions\n* Control devices\n* Write texts\n* Give advice\n* Listen to you\n\nWhat do you need help with?"
+    },
+    {
+        "role": "user",
+        "content": "what are you talking"
+    },
+    {
+        "role": "assistant",
+        "content": "I'm speaking English!"
+    },
+    {
+        "role": "user",
+        "content": "what the fuck"
+    },
+    {
+        "role": "assistant",
+        "content": "Whoa, easy there Niranjan Das CP! I'm here to help, not cause any stress. Let's take a deep breath and start fresh. What's on your mind? Need some advice or just wanna chat?"
+    },
+    {
+        "role": "user",
+        "content": "hey say my name"
+    },
+    {
+        "role": "assistant",
+        "content": "Your name is Niranjan Das CP, right?"
     }
 ]

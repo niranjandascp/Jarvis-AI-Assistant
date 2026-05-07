@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
-title Moltbot AI Launcher
-echo 🚀 Initializing Moltbot Systems...
+title JARVIS AI Launcher
+echo 🚀 Initializing JARVIS Systems...
 
 :: Navigate to root directory
 cd /d "%~dp0"

@@ -1,8 +1,8 @@
-# 🤖 Moltbot AI - Advanced Neural Interface
+# 🤖 JARVIS AI - Advanced Neural Interface
 
-Moltbot AI is a high-fidelity, dual-process artificial intelligence assistant inspired by Jarvis. It combines a **React/Electron** frontend with a **Flask/Waitress** backend to provide a seamless, local-first AI experience with stunning 3D visualizations.
+JARVIS AI is a high-fidelity, dual-process artificial intelligence assistant inspired by Tony Stark's iconic system. It combines a **React/Electron** frontend with a **Flask/Waitress** backend to provide a seamless, local-first AI experience with stunning 3D visualizations.
 
-![Moltbot Icon]
+![JARVIS Icon](icon.png)
 
 ## 🌌 Features
 - **Arc Reactor Visualizer**: A hardware-accelerated 3D core built with Three.js and GSAP that pulses in real-time during AI processing.
@@ -35,7 +35,7 @@ npm install
 ```
 
 ### 3. Model Setup
-Moltbot uses the **Llama3** model. Download it via Ollama:
+JARVIS uses the **Llama3** model. Download it via Ollama:
 ```bash
 ollama pull llama3
 ```

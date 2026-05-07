@@ -1,68 +1,116 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 import { gsap } from "gsap";
 import Visualizer from "./components/Visualizer";
+import Particles from "./components/Particles";
+import { PlaceholdersAndVanishInput } from "./components/ui/placeholders-and-vanish-input";
+import Lenis from "lenis";
 import "./App.css";
 
+const JARVIS_VERSION = "1.3.0";
+const PLACEHOLDERS = [
+  "Execute system diagnostic...",
+  "Analyze regional energy patterns.",
+  "Check orbital satellite status.",
+  "Jarvis, initiate protocol zero.",
+  "Search for encrypted Stark files.",
+  "Optimize thruster output.",
+];
+
 function App() {
-  const [input, setInput] = useState("");
-  const [messages, setMessages] = useState([{ role: "jarvis", text: "Long-term Memory Synced. Systems Online, Sir." }]);
+  const [messages, setMessages] = useState([
+    { role: "jarvis", text: "Neural Link Established. System calibration complete. Ready for orders, Sir." }
+  ]);
   const [loading, setLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [useServerVoice, setUseServerVoice] = useState(false);
   const [systemReady, setSystemReady] = useState(false);
+  const [backendStatus, setBackendStatus] = useState("checking");
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  
   const chatEndRef = useRef(null);
-
-  // Voice Recognition Setup
   const recognitionRef = useRef(null);
+  const loadingRef = useRef(false);
 
   useEffect(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.lang = "en-US";
-      recognitionRef.current.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        setInput(transcript);
-        sendMessage(transcript);
-      };
-      recognitionRef.current.onend = () => setIsListening(false);
-      recognitionRef.current.onerror = () => setIsListening(false);
-    }
+    loadingRef.current = loading;
+  }, [loading]);
 
-    const timer = setTimeout(() => setSystemReady(true), 3500);
-    const tl = gsap.timeline();
-    tl.to(".loading-overlay", { opacity: 0, duration: 1.5, delay: 2, ease: "power2.inOut", onComplete: () => setSystemReady(true) });
+  // --- LENIS SMOOTH SCROLL ---
+  useEffect(() => {
+    const lenis = new Lenis({
+        duration: 1.2,
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        orientation: 'vertical',
+        gestureOrientation: 'vertical',
+        smoothWheel: true,
+        wheelMultiplier: 1,
+        smoothTouch: false,
+        touchMultiplier: 2,
+        infinite: false,
+    });
+
+    function raf(time) {
+        lenis.raf(time);
+        requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+
+    return () => {
+        lenis.destroy();
+    };
+  }, []);
+
+  // --- MOUSE SPOTLIGHT TRACKING ---
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+        setMousePos({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
+
+  // --- HEALTH MONITOR ---
+  useEffect(() => {
+    const checkHealth = async () => {
+      try {
+        const res = await axios.get("http://127.0.0.1:5000/status");
+        if (res.data.status === "online") setBackendStatus("online");
+      } catch {
+        setBackendStatus("offline");
+      }
+    };
+    checkHealth();
+    const interval = setInterval(checkHealth, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // --- SYSTEM BOOT ---
+  useEffect(() => {
+    const timer = setTimeout(() => {
+        setSystemReady(true);
+        gsap.to(".boot-sequence", { y: "-100%", duration: 1.2, ease: "expo.inOut" });
+    }, 3000);
     return () => clearTimeout(timer);
   }, []);
 
+  // --- AUTO SCROLL & REVEAL ---
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (chatEndRef.current) {
+        chatEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
   }, [messages]);
 
-  const toggleListening = () => {
-    if (isListening) {
-      recognitionRef.current?.stop();
-    } else {
-      setIsListening(true);
-      recognitionRef.current?.start();
-    }
-  };
+  // --- MESSAGE HANDLER ---
+  const sendMessage = useCallback(async (messageText) => {
+    if (!messageText || loadingRef.current) return;
 
-  const sendMessage = async (textOverride = null) => {
-    const messageText = textOverride || input;
-    if (!messageText || loading) return;
-
-    setInput("");
     setLoading(true);
-
-    // 1. Update UI
     setMessages((prev) => [...prev, { role: "user", text: messageText }]);
-    gsap.to(".three-container", { scale: 1.15, duration: 0.2, yoyo: true, repeat: 1 });
+    
+    gsap.to(".arc-reactor-container", { scale: 1.15, duration: 0.1, yoyo: true, repeat: 1 });
 
     try {
-      // 2. Call Backend
       const res = await axios.post("http://127.0.0.1:5000/chat", { 
         message: messageText,
         use_server_voice: useServerVoice 
@@ -71,88 +119,135 @@ function App() {
       const reply = res.data.reply;
       setMessages((prev) => [...prev, { role: "jarvis", text: reply }]);
       
-      // 3. Handle Voice Output
       if (!useServerVoice) {
+        window.speechSynthesis.cancel();
         const speech = new SpeechSynthesisUtterance(reply);
-        speech.rate = 1.0;
-        speech.pitch = 0.9;
+        speech.rate = 1.05;
+        speech.pitch = 0.85;
         window.speechSynthesis.speak(speech);
       }
-
     } catch (err) {
-      console.error("Connection Error:", err);
-      setMessages((prev) => [...prev, { role: "jarvis", text: "⚠️ CRITICAL: Neural Backend Link Severed. Ensure server is running on port 5000." }]);
+      setMessages((prev) => [...prev, { role: "jarvis", text: "⚠️ BACKEND_OFFLINE: Re-establish neural server link." }]);
+      setBackendStatus("offline");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
+  }, [useServerVoice]);
+
+  const toggleListening = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+    } else {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SpeechRecognition) {
+          recognitionRef.current = new SpeechRecognition();
+          recognitionRef.current.onresult = (e) => sendMessage(e.results[0][0].transcript);
+          recognitionRef.current.onend = () => setIsListening(false);
+          recognitionRef.current.start();
+          setIsListening(true);
+      }
+    }
   };
 
   return (
     <div className="main-wrapper">
-      {!systemReady && (
-        <div className="loading-overlay">
-          <div className="loader-content">
-             <div className="spinner-outer"><div className="spinner-inner"></div></div>
-             <p className="loading-text">RECALIBRATING NEURAL MEMORY...</p>
-             <div className="progress-bar-container"><div className="progress-bar-fill"></div></div>
-          </div>
-        </div>
-      )}
+      <Particles />
+      <div className="scanline"></div>
+      
+      {/* SPOTLIGHT EFFECT */}
+      <div 
+        className="mouse-spotlight"
+        style={{ 
+            left: mousePos.x, 
+            top: mousePos.y,
+            background: `radial-gradient(600px at ${mousePos.x}px ${mousePos.y}px, rgba(0, 242, 255, 0.05), transparent 80%)`
+        }}
+      ></div>
 
-      <div className={`app-container ${systemReady ? 'visible' : 'hidden'}`}>
-        <header className="app-header">
-           <div className="status-indicator">
-              <span className={`dot ${loading ? 'busy' : 'pulse'}`}></span>
-              <span className="status-text">{loading ? "ANALYZING..." : "MEMORY SYNCED"}</span>
+      <div className="boot-sequence">
+         <div className="boot-content">
+            <div className="ring-loader"></div>
+            <p className="boot-tag">STARK_SYSTEMS v{JARVIS_VERSION} INITIALIZING</p>
+            <div className="boot-load-bar"><div className="fill"></div></div>
+         </div>
+      </div>
+
+      <div className={`app-grid-container ${systemReady ? 'active' : ''}`}>
+        <header className="glass-header">
+           <div className="header-left">
+              <div className={`status-pill ${backendStatus}`}>
+                 <span className="blink-dot"></span>
+                 LINK: {backendStatus.toUpperCase()}
+              </div>
            </div>
-           <div className="drag-handle">MOLTBOT v1.0.6 - MEMORY ACTIVE</div>
-           <div className="header-actions">
-              <button className={`server-voice-btn ${useServerVoice ? 'active' : ''}`} onClick={() => setUseServerVoice(!useServerVoice)}>
-                {useServerVoice ? "🔊 SERVER" : "🔈 BROWSER"}
+           <div className="header-center">JARVIS_MARK_VII</div>
+           <div className="header-right">
+              <button className={`mode-pill ${useServerVoice ? 'active' : ''}`} onClick={() => setUseServerVoice(!useServerVoice)}>
+                {useServerVoice ? "SRV_AUDIO" : "WEB_AUDIO"}
               </button>
-              <button className="ctrl-btn" onClick={() => window.close()}>×</button>
+              <button className="exit-circle" onClick={() => window.close()}>×</button>
            </div>
         </header>
 
-        <div className="content-grid">
-            <div className="left-panel">
-                <div className="reactor-section">
-                    <Visualizer active={loading || isListening} />
-                    <h1 className="glitch-text" data-text="MOLTBOT">MOLTBOT</h1>
-                    <p className="subtitle">PERSISTENT MEMORY MODULE</p>
-                </div>
-            </div>
-
-            <div className="right-panel">
-                <div id="chat-container">
-                    {messages.map((msg, index) => (
-                        <div key={index} className={`message-wrapper ${msg.role}`}>
-                            <div className="message-header">{msg.role === "user" ? "USER_ID: AUTHORIZED" : "JARVIS: CORE_MEMORY"}</div>
-                            <div className="message-content">{msg.text}</div>
+        <main className="bento-layout">
+            <aside className="bento-sidebar">
+                <div className="sidebar-inner">
+                    <div className="reactor-module">
+                        <Visualizer active={loading || isListening} />
+                        <h1 className="reactor-tag">JARVIS</h1>
+                        <div className="sensor-data">
+                            <div className="data-row"><span>TEMP</span><span className="val">32°C</span></div>
+                            <div className="data-row"><span>SYNC</span><span className="val">99.8%</span></div>
+                            <div className="data-row"><span>CORES</span><span className="val">08/08</span></div>
                         </div>
-                    ))}
-                    {loading && <div className="thinking-indicator"><span className="typing-dot"></span><span className="typing-dot"></span><span className="typing-dot"></span></div>}
-                    <div ref={chatEndRef} />
-                </div>
-
-                <div className="input-section">
-                    <div className="input-wrapper">
-                        <button className={`voice-btn ${isListening ? 'active' : ''}`} onClick={toggleListening}>
-                            {isListening ? "🟢" : "🎤"}
-                        </button>
-                        <input
-                            value={input}
-                            onChange={(e) => setInput(e.target.value)}
-                            onKeyPress={(e) => e.key === "Enter" && sendMessage()}
-                            placeholder={isListening ? "Listening..." : "Query the neural network..."}
-                            autoFocus
-                        />
-                        <button className={`send-btn ${loading ? 'busy' : ''}`} onClick={() => sendMessage()} disabled={loading}>
-                            {loading ? "SYNC" : "EXECUTE"}
-                        </button>
+                    </div>
+                    <div className="info-module">
+                        <h3>SYSTEM_LOGS</h3>
+                        <div className="log-entries">
+                            <p>[OK] Memory Bank Mounted</p>
+                            <p>[OK] Neural Engine Hot</p>
+                            <p>[OK] Voice Synthesizer Ready</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
+            </aside>
+
+            <section className="bento-main">
+                <div className="chat-interface">
+                    <div className="chat-messages" id="chat-container">
+                        {messages.map((msg, index) => (
+                            <div key={index} className={`chat-row ${msg.role}`}>
+                                <div className="avatar-tag">{msg.role === "user" ? "USR" : "JRV"}</div>
+                                <div className="chat-bubble">
+                                    <span className="bubble-line"></span>
+                                    {msg.text}
+                                </div>
+                            </div>
+                        ))}
+                        {loading && (
+                            <div className="loading-dots">
+                                <span></span><span></span><span></span>
+                            </div>
+                        )}
+                        <div ref={chatEndRef} />
+                    </div>
+
+                    <div className="input-dock-wrapper">
+                        <div className="floating-dock">
+                            <button className={`mic-circle ${isListening ? 'active' : ''}`} onClick={toggleListening}>
+                                {isListening ? "📡" : "🎤"}
+                            </button>
+                            <div className="vanish-input-container">
+                                <PlaceholdersAndVanishInput
+                                    placeholders={PLACEHOLDERS}
+                                    onSubmit={(e) => sendMessage(e.target.value)}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
       </div>
     </div>
   );

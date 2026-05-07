@@ -1,0 +1,117 @@
+.arc-reactor-container {
+    width: 300px;
+    height: 300px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+    perspective: 1000px;
+}
+
+.reactor-core-outer {
+    position: relative;
+    width: 250px;
+    height: 250px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transform-style: preserve-3d;
+}
+
+.ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid transparent;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+}
+
+.ring-1 {
+    width: 240px;
+    height: 240px;
+    border-top: 2px solid var(--primary);
+    border-bottom: 2px solid var(--primary);
+    animation: rotate 6s linear infinite;
+    box-shadow: 0 0 20px var(--primary-glow);
+    opacity: 0.8;
+}
+
+.ring-2 {
+    width: 180px;
+    height: 180px;
+    border-left: 2px solid var(--secondary);
+    border-right: 2px solid var(--secondary);
+    animation: rotate-reverse 4s linear infinite;
+    opacity: 0.6;
+}
+
+.ring-3 {
+    width: 120px;
+    height: 120px;
+    border: 1px dashed var(--primary);
+    animation: rotate 3s linear infinite;
+    opacity: 0.4;
+}
+
+.core-glow {
+    width: 70px;
+    height: 70px;
+    background: var(--primary);
+    border-radius: 50%;
+    box-shadow: 
+        0 0 40px var(--primary),
+        0 0 80px var(--primary-glow),
+        inset 0 0 20px rgba(255, 255, 255, 0.8);
+    animation: core-breathing 4s infinite alternate ease-in-out;
+    z-index: 10;
+}
+
+.data-pulses span {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 1px solid var(--primary);
+    border-radius: 50%;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.active .data-pulses span {
+    animation: pulse-out 1.5s infinite;
+}
+
+.active .data-pulses span:nth-child(2) { animation-delay: 0.5s; }
+.active .data-pulses span:nth-child(3) { animation-delay: 1s; }
+
+.arc-reactor-container.active .core-glow {
+    background: var(--secondary);
+    box-shadow: 0 0 60px var(--secondary), 0 0 120px var(--secondary-glow);
+    transform: scale(1.1);
+}
+
+.arc-reactor-container.active .ring-1 {
+    border-width: 3px;
+    animation-duration: 1.5s;
+    opacity: 1;
+}
+
+@keyframes rotate {
+    from { transform: rotateZ(0deg) rotateX(20deg); }
+    to { transform: rotateZ(360deg) rotateX(20deg); }
+}
+
+@keyframes rotate-reverse {
+    from { transform: rotateZ(360deg) rotateX(-20deg); }
+    to { transform: rotateZ(0deg) rotateX(-20deg); }
+}
+
+@keyframes core-breathing {
+    0% { transform: scale(0.95) translateZ(0); filter: brightness(0.8); }
+    100% { transform: scale(1.05) translateZ(20px); filter: brightness(1.2); }
+}
+
+@keyframes pulse-out {
+    0% { transform: scale(0.5); opacity: 0.8; }
+    100% { transform: scale(2.5); opacity: 0; }
+}
