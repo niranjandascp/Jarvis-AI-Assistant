@@ -1,0 +1,9 @@
+flask
+flask-cors
+ollama
+psutil
+pyttsx3
+pyaudio
+requests
+pyinstaller
+waitress

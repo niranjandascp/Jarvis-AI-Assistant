@@ -1,15 +1,34 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
+import { gsap } from "gsap";
+import Visualizer from "./components/Visualizer";
 import "./App.css";
 
 function App() {
   const [input, setInput] = useState("");
-  // Back to local state management
-  const [messages, setMessages] = useState([{ role: "jarvis", text: "Systems Online, Sir." }]);
+  const [messages, setMessages] = useState([{ role: "jarvis", text: "Systems Online, Sir. How may I assist you today?" }]);
   const [loading, setLoading] = useState(false);
+  const [systemReady, setSystemReady] = useState(false);
   const chatEndRef = useRef(null);
 
-  // Auto scroll to bottom when a new message arrives
+  useEffect(() => {
+    // Robust startup sequence
+    const timer = setTimeout(() => {
+        setSystemReady(true);
+    }, 3500); // Fail-safe: Always show UI after 3.5s
+
+    const tl = gsap.timeline();
+    tl.to(".loading-overlay", { 
+        opacity: 0, 
+        duration: 1.5, 
+        delay: 2, 
+        ease: "power2.inOut",
+        onComplete: () => setSystemReady(true) 
+    });
+
+    return () => clearTimeout(timer);
+  }, []);
+
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -21,54 +40,107 @@ function App() {
     setInput("");
     setLoading(true);
 
-    // 1. Add User message to UI immediately
     setMessages((prev) => [...prev, { role: "user", text: userText }]);
+    
+    gsap.to(".three-container", { scale: 1.1, duration: 0.2, yoyo: true, repeat: 1 });
 
     try {
-      // 2. Send to Flask
       const res = await axios.post("http://127.0.0.1:5000/chat", { message: userText });
-      
-      // 3. Add Jarvis reply to UI
       const reply = res.data.reply;
+      
       setMessages((prev) => [...prev, { role: "jarvis", text: reply }]);
       
-      // 4. Voice output (Optional)
       const speech = new SpeechSynthesisUtterance(reply);
+      speech.rate = 1.1;
       window.speechSynthesis.speak(speech);
 
     } catch (err) {
-      setMessages((prev) => [...prev, { role: "jarvis", text: "⚠️ Server connection failed." }]);
+      setMessages((prev) => [...prev, { role: "jarvis", text: "⚠️ SYSTEM ERROR: Neural Backend Link Severed." }]);
     }
     setLoading(false);
   };
 
   return (
-    <div className="app-container">
-      <div className="reactor-container">
-        <div className={`arc-reactor ${loading ? "active" : ""}`}></div>
-        <h2 className="glitch-text">MOLTBOT AI</h2>
-      </div>
-
-      <div id="chat-container">
-        {messages.map((msg, index) => (
-          <div key={index} className={`message ${msg.role === "user" ? "user-msg" : "jarvis-msg"}`}>
-            {msg.text}
+    <div className="main-wrapper">
+      {/* Loading Overlay remains until systemReady */}
+      {!systemReady && (
+        <div className="loading-overlay">
+          <div className="loader-content">
+             <div className="spinner-outer">
+                <div className="spinner-inner"></div>
+             </div>
+             <p className="loading-text">DECRYPTING MOLTBOT OS...</p>
+             <div className="progress-bar-container">
+                <div className="progress-bar-fill"></div>
+             </div>
           </div>
-        ))}
-        {loading && <div className="thinking">🧠 Processing...</div>}
-        <div ref={chatEndRef} />
-      </div>
+        </div>
+      )}
 
-      <div className="input-area">
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyPress={(e) => e.key === "Enter" && sendMessage()}
-          placeholder="Type your command..."
-        />
-        <button onClick={sendMessage} disabled={loading}>
-          {loading ? "..." : "Send"}
-        </button>
+      {/* Main App Container - always rendered but hidden by overlay */}
+      <div className={`app-container ${systemReady ? 'visible' : 'hidden'}`}>
+        <header className="app-header">
+           <div className="status-indicator">
+              <span className="dot pulse"></span>
+              <span className="status-text">ENCRYPTED LINK ACTIVE</span>
+           </div>
+           <div className="drag-handle">MOLTBOT v1.0.4</div>
+           <div className="window-controls">
+              <button className="ctrl-btn" onClick={() => window.close()}>×</button>
+           </div>
+        </header>
+
+        <div className="content-grid">
+            <div className="left-panel">
+                <div className="reactor-section">
+                    <Visualizer active={loading} />
+                    <h1 className="glitch-text" data-text="MOLTBOT">MOLTBOT</h1>
+                    <p className="subtitle">ADVANCED NEURAL INTERFACE</p>
+                </div>
+            </div>
+
+            <div className="right-panel">
+                <div id="chat-container">
+                    {messages.map((msg, index) => (
+                        <div key={index} className={`message-wrapper ${msg.role}`}>
+                            <div className="message-header">
+                                {msg.role === "user" ? "AUTHORIZATION: USER" : "SOURCE: JARVIS"}
+                            </div>
+                            <div className="message-content">
+                                {msg.text}
+                            </div>
+                        </div>
+                    ))}
+                    {loading && (
+                        <div className="thinking-indicator">
+                            <span className="typing-dot"></span>
+                            <span className="typing-dot"></span>
+                            <span className="typing-dot"></span>
+                        </div>
+                    )}
+                    <div ref={chatEndRef} />
+                </div>
+
+                <div className="input-section">
+                    <div className="input-wrapper">
+                        <input
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            onKeyPress={(e) => e.key === "Enter" && sendMessage()}
+                            placeholder="Enter system command..."
+                            autoFocus
+                        />
+                        <button 
+                            className={`send-btn ${loading ? 'busy' : ''}`} 
+                            onClick={sendMessage} 
+                            disabled={loading}
+                        >
+                            {loading ? "PROCESS" : "EXECUTE"}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
       </div>
     </div>
   );

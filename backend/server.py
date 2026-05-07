@@ -1,10 +1,9 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS  # Ensure you ran: pip install flask-cors
+from flask_cors import CORS
 from commands import run_command
 from brain import ask_ai
 
 app = Flask(__name__)
-# This allows ANY frontend to talk to this backend
 CORS(app) 
 
 memory = []
@@ -15,15 +14,12 @@ def chat():
         data = request.get_json()
         user_msg = data.get("message", "")
 
-        # 1. Check for commands
         cmd_reply = run_command(user_msg)
         if cmd_reply:
             return jsonify({"reply": cmd_reply})
 
-        # 2. Ask the AI
         reply = ask_ai(user_msg, memory)
         
-        # Update memory
         memory.append({"role": "user", "content": user_msg})
         memory.append({"role": "assistant", "content": reply})
         
@@ -38,5 +34,6 @@ def chat():
         return jsonify({"reply": "I encountered a glitch, Sir."})
 
 if __name__ == "__main__":
-    # Change host to 127.0.0.1 to match your terminal exactly
-    app.run(host="127.0.0.1", port=5000, debug=True)
+    from waitress import serve
+    print("Neural Backend starting on http://127.0.0.1:5000")
+    serve(app, host="127.0.0.1", port=5000)
