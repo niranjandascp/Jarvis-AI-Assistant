@@ -39,8 +39,11 @@
     ]
   },
   "devDependencies": {
+    "autoprefixer": "^10.5.0",
     "electron": "^41.2.1",
-    "electron-builder": "^24.13.3"
+    "electron-builder": "^24.13.3",
+    "postcss": "^8.5.14",
+    "tailwindcss": "^4.2.4"
   },
   "build": {
     "appId": "com.moltbot.ai",

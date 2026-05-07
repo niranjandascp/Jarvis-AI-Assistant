@@ -7,7 +7,18 @@ import { PlaceholdersAndVanishInput } from "./components/ui/placeholders-and-van
 import Lenis from "lenis";
 import "./App.css";
 
-const JARVIS_VERSION = "1.3.0";
+// Check if running in Electron
+let ipcRenderer = null;
+try {
+    if (window.require) {
+        const electron = window.require("electron");
+        ipcRenderer = electron.ipcRenderer;
+    }
+} catch (e) {
+    console.log("Not running in Electron environment.");
+}
+
+const JARVIS_VERSION = "1.4.0";
 const PLACEHOLDERS = [
   "Execute system diagnostic...",
   "Analyze regional energy patterns.",
@@ -56,16 +67,12 @@ function App() {
     }
     requestAnimationFrame(raf);
 
-    return () => {
-        lenis.destroy();
-    };
+    return () => lenis.destroy();
   }, []);
 
   // --- MOUSE SPOTLIGHT TRACKING ---
   useEffect(() => {
-    const handleMouseMove = (e) => {
-        setMousePos({ x: e.clientX, y: e.clientY });
-    };
+    const handleMouseMove = (e) => setMousePos({ x: e.clientX, y: e.clientY });
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
@@ -89,12 +96,11 @@ function App() {
   useEffect(() => {
     const timer = setTimeout(() => {
         setSystemReady(true);
-        gsap.to(".boot-sequence", { y: "-100%", duration: 1.2, ease: "expo.inOut" });
-    }, 3000);
+    }, 2000);
     return () => clearTimeout(timer);
   }, []);
 
-  // --- AUTO SCROLL & REVEAL ---
+  // --- AUTO SCROLL ---
   useEffect(() => {
     if (chatEndRef.current) {
         chatEndRef.current.scrollIntoView({ behavior: "smooth" });
@@ -127,7 +133,7 @@ function App() {
         window.speechSynthesis.speak(speech);
       }
     } catch (err) {
-      setMessages((prev) => [...prev, { role: "jarvis", text: "⚠️ BACKEND_OFFLINE: Re-establish neural server link." }]);
+      setMessages((prev) => [...prev, { role: "jarvis", text: "⚠️ BACKEND_OFFLINE: Connection severed." }]);
       setBackendStatus("offline");
     } finally {
       setLoading(false);
@@ -149,43 +155,56 @@ function App() {
     }
   };
 
+  // --- WINDOW CONTROLS ---
+  const handleWindowAction = (action) => {
+    console.log(`Executing window action: ${action}`);
+    if (ipcRenderer) {
+        ipcRenderer.send(`window-${action}`);
+    } else {
+        // Fallback for browser testing
+        if (action === 'close') window.close();
+    }
+  };
+
   return (
     <div className="main-wrapper">
+      <div className="window-drag-handle"></div>
       <Particles />
       <div className="scanline"></div>
       
-      {/* SPOTLIGHT EFFECT */}
       <div 
         className="mouse-spotlight"
         style={{ 
             left: mousePos.x, 
             top: mousePos.y,
-            background: `radial-gradient(600px at ${mousePos.x}px ${mousePos.y}px, rgba(0, 242, 255, 0.05), transparent 80%)`
+            background: `radial-gradient(800px at ${mousePos.x}px ${mousePos.y}px, rgba(0, 242, 255, 0.05), transparent 80%)`
         }}
       ></div>
 
-      <div className="boot-sequence">
+      <div className={`boot-sequence ${systemReady ? 'exit' : ''}`}>
          <div className="boot-content">
-            <div className="ring-loader"></div>
-            <p className="boot-tag">STARK_SYSTEMS v{JARVIS_VERSION} INITIALIZING</p>
-            <div className="boot-load-bar"><div className="fill"></div></div>
+            <div className="apple-loader"></div>
+            <p className="boot-tag">SYSTEM_BOOT_V{JARVIS_VERSION}</p>
          </div>
       </div>
 
       <div className={`app-grid-container ${systemReady ? 'active' : ''}`}>
         <header className="glass-header">
-           <div className="header-left">
+           <div className="header-left traffic-lights">
+              <button className="light close" onClick={() => handleWindowAction('close')}></button>
+              <button className="light minimize" onClick={() => handleWindowAction('minimize')}></button>
+              <button className="light maximize" onClick={() => handleWindowAction('maximize')}></button>
+           </div>
+           
+           <div className="header-center">JARVIS_MARK_VII</div>
+           
+           <div className="header-right no-drag">
               <div className={`status-pill ${backendStatus}`}>
-                 <span className="blink-dot"></span>
                  LINK: {backendStatus.toUpperCase()}
               </div>
-           </div>
-           <div className="header-center">JARVIS_MARK_VII</div>
-           <div className="header-right">
               <button className={`mode-pill ${useServerVoice ? 'active' : ''}`} onClick={() => setUseServerVoice(!useServerVoice)}>
-                {useServerVoice ? "SRV_AUDIO" : "WEB_AUDIO"}
+                {useServerVoice ? "SRV_VOICE" : "WEB_VOICE"}
               </button>
-              <button className="exit-circle" onClick={() => window.close()}>×</button>
            </div>
         </header>
 
@@ -196,9 +215,8 @@ function App() {
                         <Visualizer active={loading || isListening} />
                         <h1 className="reactor-tag">JARVIS</h1>
                         <div className="sensor-data">
-                            <div className="data-row"><span>TEMP</span><span className="val">32°C</span></div>
-                            <div className="data-row"><span>SYNC</span><span className="val">99.8%</span></div>
-                            <div className="data-row"><span>CORES</span><span className="val">08/08</span></div>
+                            <div className="data-row"><span>CORE_TEMP</span><span className="val">32°C</span></div>
+                            <div className="data-row"><span>SYNC_RATE</span><span className="val">99.8%</span></div>
                         </div>
                     </div>
                     <div className="info-module">
@@ -206,7 +224,6 @@ function App() {
                         <div className="log-entries">
                             <p>[OK] Memory Bank Mounted</p>
                             <p>[OK] Neural Engine Hot</p>
-                            <p>[OK] Voice Synthesizer Ready</p>
                         </div>
                     </div>
                 </div>
@@ -219,7 +236,6 @@ function App() {
                             <div key={index} className={`chat-row ${msg.role}`}>
                                 <div className="avatar-tag">{msg.role === "user" ? "USR" : "JRV"}</div>
                                 <div className="chat-bubble">
-                                    <span className="bubble-line"></span>
                                     {msg.text}
                                 </div>
                             </div>
