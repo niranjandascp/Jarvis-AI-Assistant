@@ -1,76 +1,112 @@
-# 🤖 JARVIS AI - Advanced Neural Interface
+# 🦾 JARVIS: MARK VII NEURAL INTERFACE
+> **The ultimate AI companion with a liquid-glass aesthetic and a high-performance neural backbone.**
 
-JARVIS AI is a high-fidelity, dual-process artificial intelligence assistant inspired by Tony Stark's iconic system. It combines a **React/Electron** frontend with a **Flask/Waitress** backend to provide a seamless, local-first AI experience with stunning 3D visualizations.
-
-![JARVIS Icon](icon.png)
-
-## 🌌 Features
-- **Arc Reactor Visualizer**: A hardware-accelerated 3D core built with Three.js and GSAP that pulses in real-time during AI processing.
-- **Neural Brain**: Powered by **Ollama (Llama3)** for sophisticated, local, and private natural language processing.
-- **Hybrid Architecture**: 
-  - **Dev Mode**: Real-time UI updates via React Dev Server.
-  - **Production Mode**: Blazing fast static-build execution.
-  - **Browser Mode**: Access your assistant from any device on your local network.
-- **Robust Startup**: Automated TCP polling ensures the backend and frontend are synchronized before the UI launches.
-- **One-Click Distribution**: Built-in scripts to bundle the entire Python environment and UI into a single standalone `.exe`.
+[![Neural Link](https://img.shields.io/badge/Neural_Link-ACTIVE-00f2ff?style=for-the-badge&logo=ai)](https://github.com/niranjandascp/Moltbot)
+[![Stark OS](https://img.shields.io/badge/Stark_OS-v1.4.0-ff0055?style=for-the-badge)](https://github.com/niranjandascp/Moltbot)
+[![License](https://img.shields.io/badge/License-Proprietary-gold?style=for-the-badge)](LICENSE)
 
 ---
 
-## 🚀 Getting Started
+## 📖 Overview
+JARVIS (Just A Rather Very Intelligent System) is a high-end, frameless AI command center. It bridges the gap between local LLM power and cinematic UI design. Built for high-performance interaction, it features a **Liquid Glass** design system inspired by the next generation of Apple's OS.
 
-### 1. Prerequisites
-- **Node.js** (v18+)
-- **Python** (v3.10+)
-- **Ollama** (Download from [ollama.com](https://ollama.com))
-
-### 2. Installation
-Clone the repository and run the setup commands:
-```bash
-# Install Python dependencies
-pip install -r requirements.txt
-
-# Install Frontend dependencies
-cd frontend
-npm install
-```
-
-### 3. Model Setup
-JARVIS uses the **Llama3** model. Download it via Ollama:
-```bash
-ollama pull llama3
+### 🏗️ Architecture
+```mermaid
+graph TD
+    A[User Interface - React 19] -->|IPC / HTTP| B[Electron Wrapper]
+    B -->|Neural Link| C[Flask Backend]
+    C -->|Context| D[Memory Bank - JSON]
+    C -->|Inference| E[Ollama / Llama 3]
+    A -->|Smooth Scroll| F[Lenis Engine]
+    A -->|Animations| G[GSAP / Framer Motion]
 ```
 
 ---
 
-## 🛠️ Usage Guide
-
-### 📂 Quick Launchers (Recommended)
-I have provided specialized batch scripts for different workflows:
-- **`launch_dev.bat`**: Best for developers. Enables Hot Module Replacement (HMR).
-- **`launch_prod.bat`**: Best for daily use. Uses the optimized static build for performance.
-- **`run_browser.bat`**: Runs the backend and UI engine for access via Chrome/Edge at `localhost:3000`.
-
-### 📦 Standalone Packaging
-To create a single, portable executable icon:
-1.  **Bundle Backend**: `python scripts/bundle_backend.py` (Creates `server.exe`).
-2.  **Distribute App**: `cd frontend && npm run dist`.
-3.  Find your installer in `frontend/dist/`.
+## 💎 Features
+- **🧠 Neural Persistence**: Atomic memory management with absolute path resolution.
+- **🌊 Liquid Glass Design**: 40px backdrop-blur, 200% saturation, and interactive spotlights.
+- **🖥️ Native OS Integration**: Frameless window with macOS Traffic Lights (Close, Min, Max).
+- **🎙️ Advanced Voice Hub**: Integrated speech recognition and high-fidelity server-side synthesis.
+- **🌊 Momentum Scrolling**: Industry-standard smooth scrolling via Lenis.
+- **🐳 Docker Ready**: Optimized multi-stage containerization for instant deployment.
 
 ---
 
-## 🏗️ Architecture Detail
-- **Frontend**: React 19, Three.js, GSAP 3 (Animations).
-- **Desktop Wrapper**: Electron 41 (Frameless, Glassmorphic UI).
-- **Backend**: Flask + Waitress (Production WSGI).
-- **AI Integration**: Ollama API (llama3 model).
-- **System Diagnostics**: Psutil (CPU/Battery metrics).
+## 🛠️ Tech Stack
+| Tier | Technology |
+| :--- | :--- |
+| **Frontend** | React 19, GSAP, Framer Motion, Lenis |
+| **Backend** | Python 3.9, Flask, pyttsx3 |
+| **Neural** | Ollama API (Llama 3 Model) |
+| **Environment** | Electron (Native Bridge), Docker & Compose |
+| **Styling** | Vanilla CSS (Liquid Glass System) |
+
+---
+
+## 🚀 Installation & Setup
+
+### 📋 Prerequisites
+- **Node.js**: v18.0.0 or higher
+- **Python**: v3.9 or higher
+- **Docker**: (Optional) For containerized deployment
+- **Ollama**: Required for local LLM inference ([Download Ollama](https://ollama.com))
+
+---
+
+### 📦 Option 1: Native Desktop (Recommended)
+1. **Clone & Setup Backend**:
+   ```bash
+   git clone https://github.com/niranjandascp/Moltbot.git
+   cd moltbot
+   pip install -r requirements.txt
+   ```
+2. **Setup Frontend**:
+   ```bash
+   cd frontend
+   npm install
+   ```
+3. **Launch JARVIS**:
+   ```bash
+   npm run electron
+   ```
+   *The system will automatically initialize the neural core and sync all ports.*
+
+---
+
+### 🐳 Option 2: Docker Deployment (Professional)
+Deploy the full stack in an isolated, high-security container.
+
+1. **Install Docker Desktop**: [Download here](https://www.docker.com/products/docker-desktop/)
+2. **Build and Start**:
+   ```bash
+   docker-compose up --build
+   ```
+3. **Access JARVIS**:
+   - **UI**: `http://localhost:3000`
+   - **Neural API**: `http://localhost:5000`
+
+---
+
+## ⚓ Window Management
+| Action | Interface Control |
+| :--- | :--- |
+| **Reposition** | Grab the **top 35px** of the glass header and drag. |
+| **Minimize** | Click the **🟡 Yellow** traffic light. |
+| **Maximize** | Click the **🟢 Green** traffic light. |
+| **Shutdown** | Click the **🔴 Red** traffic light (Terminates all neural processes). |
 
 ---
 
 ## 🔧 Troubleshooting
-- **Black Screen**: The UI takes ~3 seconds to "decrypt" (fade in). If it stays black, ensure your ports (3000, 5000) aren't being used by other apps.
-- **"Glitch" Response**: Ensure the Ollama server is running and the `llama3` model is downloaded.
-- **Voice Issues**: Check your system's default TTS/STT settings.
+- **Stuck on Loading?**: Ensure the backend (Port 5000) and frontend (Port 3000) are not blocked by your firewall.
+- **No Response?**: Verify that the **Ollama** service is running and the `llama3` model is pulled (`ollama pull llama3`).
+- **Memory Error?**: The system automatically creates `memory.json`. If permissions fail, ensure the app has write access to the `backend/` directory.
 
 ---
 
+## 📜 License & Support
+This project is licensed under proprietary Stark Industries protocols. 
+For support or neural recalibration, please contact the lead developer.
+
+**"Neural link established. Systems are at 100%, Sir."**
