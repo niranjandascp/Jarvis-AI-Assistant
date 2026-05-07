@@ -270,5 +270,13 @@
     {
         "role": "assistant",
         "content": "That's perfectly fine, Niranjan Das!\n\nAs Jarvis, I'm designed to be attentive and available whenever you need me. If you ever have a question, want to share something, or just need some assistance, feel free to reach out.\n\nIn the meantime, I'll keep an eye on things around here and ensure everything runs smoothly. When you're ready to chat again, I'll be here, ready to listen and help in any way I can!\n\nTake care, Niranjan Das!"
+    },
+    {
+        "role": "user",
+        "content": "heyy"
+    },
+    {
+        "role": "assistant",
+        "content": "Heyy back at ya, Niranjan Das!\n\nIt's great to see you're feeling chatty! What's on your mind? Do you have a question, want to share something, or just need some company?\n\nAs Jarvis, I'm always here to listen and help. Whether it's providing information, making suggestions, or simply being a sounding board for your thoughts, I'm all ears!\n\nWhat's up, Niranjan Das?"
     }
 ]

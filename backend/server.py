@@ -1,8 +1,8 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 from commands import run_command
-from brain import ask_ai
-import memory # Import the module first
+from brain import ask_ai, stream_ai
+import memory
 from memory import memory_manager
 import pyttsx3
 import threading
@@ -72,6 +72,30 @@ def chat():
     except Exception as e:
         print(f"SYSTEM_ERROR: {e}", file=sys.stderr)
         return jsonify({"reply": f"Sir, I encountered a neural glitch: {str(e)}"})
+
+@app.route("/stream", methods=["POST"])
+def stream():
+    try:
+        data = request.get_json()
+        user_msg = data.get("message", "")
+        
+        # 1. Context retrieval
+        context = memory_manager.get_memory(limit=10)
+
+        def generate():
+            full_reply = ""
+            for chunk in stream_ai(user_msg, context):
+                full_reply += chunk
+                yield f"data: {chunk}\n\n"
+            
+            # 2. Save interaction after stream ends
+            memory_manager.add_interaction(user_msg, full_reply)
+            yield "data: [DONE]\n\n"
+
+        return Response(generate(), mimetype='text/event-stream')
+
+    except Exception as e:
+        return jsonify({"reply": f"Streaming Error: {str(e)}"}), 500
 
 @app.route("/status", methods=["GET"])
 def status():

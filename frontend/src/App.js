@@ -107,33 +107,58 @@ function App() {
     }
   }, [messages]);
 
-  // --- MESSAGE HANDLER ---
+  // --- MESSAGE HANDLER (STREAMING ENABLED) ---
   const sendMessage = useCallback(async (messageText) => {
     if (!messageText || loadingRef.current) return;
 
     setLoading(true);
     setMessages((prev) => [...prev, { role: "user", text: messageText }]);
+    setMessages((prev) => [...prev, { role: "jarvis", text: "" }]); // Placeholder for stream
     
     gsap.to(".arc-reactor-container", { scale: 1.15, duration: 0.1, yoyo: true, repeat: 1 });
 
     try {
-      const res = await axios.post("http://127.0.0.1:5000/chat", { 
-        message: messageText,
-        use_server_voice: useServerVoice 
+      const response = await fetch("http://127.0.0.1:5000/stream", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: messageText })
       });
-      
-      const reply = res.data.reply;
-      setMessages((prev) => [...prev, { role: "jarvis", text: reply }]);
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let fullText = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split("\n\n");
+        
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            const data = line.replace("data: ", "");
+            if (data === "[DONE]") break;
+            
+            fullText += data;
+            setMessages((prev) => {
+              const newMsgs = [...prev];
+              newMsgs[newMsgs.length - 1].text = fullText;
+              return newMsgs;
+            });
+          }
+        }
+      }
       
       if (!useServerVoice) {
         window.speechSynthesis.cancel();
-        const speech = new SpeechSynthesisUtterance(reply);
+        const speech = new SpeechSynthesisUtterance(fullText);
         speech.rate = 1.05;
         speech.pitch = 0.85;
         window.speechSynthesis.speak(speech);
       }
     } catch (err) {
-      setMessages((prev) => [...prev, { role: "jarvis", text: "⚠️ BACKEND_OFFLINE: Connection severed." }]);
+      setMessages((prev) => [...prev, { role: "jarvis", text: "⚠️ STREAM_ERROR: Connection to neural core failed." }]);
       setBackendStatus("offline");
     } finally {
       setLoading(false);

@@ -32,3 +32,25 @@ def ask_ai(prompt, history):
         
         print(f"Neural Error: {e}", file=sys.stderr)
         return f"Sir, I encountered a neural link error: {str(e)}"
+
+def stream_ai(prompt, history):
+    """
+    JARVIS Neural Streaming Engine.
+    Yields chunks of the AI response in real-time.
+    """
+    try:
+        stream = ollama.chat(
+            model="llama3",
+            messages=[
+                {"role": "system", "content": "You are Jarvis, an advanced AI assistant created by Tony Stark. Be helpful, concise, and professional."},
+                *history,
+                {"role": "user", "content": prompt}
+            ],
+            stream=True
+        )
+        for chunk in stream:
+            if 'message' in chunk and 'content' in chunk['message']:
+                yield chunk['message']['content']
+
+    except Exception as e:
+        yield f"⚠️ NEURAL_ERROR: {str(e)}"
