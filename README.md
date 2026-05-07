@@ -1,29 +1,76 @@
-# Moltbot AI - Advanced System Refactor
+# 🤖 Moltbot AI - Advanced Neural Interface
 
-Moltbot has been upgraded to a production-ready, robust architecture with automated system health checks.
+Moltbot AI is a high-fidelity, dual-process artificial intelligence assistant inspired by Jarvis. It combines a **React/Electron** frontend with a **Flask/Waitress** backend to provide a seamless, local-first AI experience with stunning 3D visualizations.
 
-## Key Upgrades
-1.  **System Polling**: Electron now uses TCP polling to verify that the **Neural Backend (5000)** and **UI Engine (3000)** are fully active before showing the interface. No more "Connection Refused" errors.
-2.  **Waitress Integration**: Replaced the Flask development server with **Waitress**, a production-grade WSGI server, ensuring stability and performance.
-3.  **Production Mode**: A new `launch_prod.bat` allows you to run the app using the static build folder, bypassing the heavy React development server for a faster, "standalone-like" experience.
-4.  **One-Click Packaging**: Updated bundling scripts to handle relative path mapping for the neural backend, ensuring the app works perfectly after being packaged into a single icon.
+![Moltbot Icon]
 
-## Setup & Launch
-
-### 1. Development Mode (Fast Updates)
-Double-click `launch_dev.bat`. This will start the React dev server, allowing you to see code changes in real-time.
-
-### 2. Production Mode (Optimized)
-Double-click `launch_prod.bat`. This builds the UI (if not already built) and runs it as a standalone static app. This is the fastest way to run the finished assistant.
-
-### 3. Packaging into a Single EXE
-1.  Run `python scripts/bundle_backend.py`.
-2.  Run `cd frontend && npm run dist`.
-The resulting `.exe` in `frontend/dist` will be fully self-contained.
-
-## Dependencies
-- **Backend**: Flask, Waitress, Ollama, Psutil, Pyttsx3, PyAudio.
-- **Frontend**: React, Three.js, GSAP, Electron.
+## 🌌 Features
+- **Arc Reactor Visualizer**: A hardware-accelerated 3D core built with Three.js and GSAP that pulses in real-time during AI processing.
+- **Neural Brain**: Powered by **Ollama (Llama3)** for sophisticated, local, and private natural language processing.
+- **Hybrid Architecture**: 
+  - **Dev Mode**: Real-time UI updates via React Dev Server.
+  - **Production Mode**: Blazing fast static-build execution.
+  - **Browser Mode**: Access your assistant from any device on your local network.
+- **Robust Startup**: Automated TCP polling ensures the backend and frontend are synchronized before the UI launches.
+- **One-Click Distribution**: Built-in scripts to bundle the entire Python environment and UI into a single standalone `.exe`.
 
 ---
-*Systems Optimized by Antigravity AI.*
+
+## 🚀 Getting Started
+
+### 1. Prerequisites
+- **Node.js** (v18+)
+- **Python** (v3.10+)
+- **Ollama** (Download from [ollama.com](https://ollama.com))
+
+### 2. Installation
+Clone the repository and run the setup commands:
+```bash
+# Install Python dependencies
+pip install -r requirements.txt
+
+# Install Frontend dependencies
+cd frontend
+npm install
+```
+
+### 3. Model Setup
+Moltbot uses the **Llama3** model. Download it via Ollama:
+```bash
+ollama pull llama3
+```
+
+---
+
+## 🛠️ Usage Guide
+
+### 📂 Quick Launchers (Recommended)
+I have provided specialized batch scripts for different workflows:
+- **`launch_dev.bat`**: Best for developers. Enables Hot Module Replacement (HMR).
+- **`launch_prod.bat`**: Best for daily use. Uses the optimized static build for performance.
+- **`run_browser.bat`**: Runs the backend and UI engine for access via Chrome/Edge at `localhost:3000`.
+
+### 📦 Standalone Packaging
+To create a single, portable executable icon:
+1.  **Bundle Backend**: `python scripts/bundle_backend.py` (Creates `server.exe`).
+2.  **Distribute App**: `cd frontend && npm run dist`.
+3.  Find your installer in `frontend/dist/`.
+
+---
+
+## 🏗️ Architecture Detail
+- **Frontend**: React 19, Three.js, GSAP 3 (Animations).
+- **Desktop Wrapper**: Electron 41 (Frameless, Glassmorphic UI).
+- **Backend**: Flask + Waitress (Production WSGI).
+- **AI Integration**: Ollama API (llama3 model).
+- **System Diagnostics**: Psutil (CPU/Battery metrics).
+
+---
+
+## 🔧 Troubleshooting
+- **Black Screen**: The UI takes ~3 seconds to "decrypt" (fade in). If it stays black, ensure your ports (3000, 5000) aren't being used by other apps.
+- **"Glitch" Response**: Ensure the Ollama server is running and the `llama3` model is downloaded.
+- **Voice Issues**: Check your system's default TTS/STT settings.
+
+---
+
