@@ -1,7 +1,7 @@
 try:
-    from .skills.registry import execute_skill
+    from skills.registry import execute_skill
     # Import skills modules relatively
-    from .skills import system_skills
+    from skills import system_skills
 except (ImportError, ValueError):
     try:
         from skills.registry import execute_skill

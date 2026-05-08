@@ -1,6 +1,6 @@
 import os
 import subprocess
-from .registry import register_skill
+from skills.registry import register_skill
 
 @register_skill(["time", "clock"])
 def get_time(command):

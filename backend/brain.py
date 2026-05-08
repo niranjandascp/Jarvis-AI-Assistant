@@ -1,6 +1,6 @@
 import ollama
 import sys
-from .settings import settings_manager
+from settings import settings_manager
 
 def ask_ai(prompt, history):
     """
