@@ -12,3 +12,4 @@ sounddevice
 redis
 edge-tts
 pygame
+pyautogui

@@ -1,5 +1,7 @@
 import os
 import subprocess
+import pyautogui
+import ctypes
 from skills.registry import register_skill
 
 @register_skill(["time", "clock"])
@@ -26,3 +28,32 @@ def open_calc(command):
 @register_skill(["status", "diagnostic"])
 def system_status(command):
     return "All systems are functioning within normal parameters. Arc Reactor output is steady at 99.8%."
+
+@register_skill(["open chrome", "browser"])
+def open_chrome(command):
+    try:
+        subprocess.Popen("chrome")
+        return "Launching Chrome for you, Sir."
+    except:
+        return "I could not find the Chrome executable, Sir."
+
+@register_skill(["screenshot", "capture screen"])
+def take_screenshot(command):
+    try:
+        pyautogui.screenshot().save("screenshot.png")
+        return "Snapshot taken and saved to the root directory, Sir."
+    except:
+        return "Sir, I encountered an error during the capture sequence."
+
+@register_skill(["volume up", "louder"])
+def volume_up(command):
+    pyautogui.press("volumeup")
+    return "Increasing audio output, Sir."
+
+@register_skill(["lock screen", "lock windows"])
+def lock_screen(command):
+    try:
+        ctypes.windll.user32.LockWorkStation()
+        return "Systems locked, Sir. Stay safe."
+    except:
+        return "Sir, the security protocols failed to initialize."
