@@ -3,6 +3,7 @@ import subprocess
 import pyautogui
 import ctypes
 from skills.registry import register_skill
+from settings import settings_manager
 
 @register_skill(["time", "clock"])
 def get_time(command):
@@ -78,3 +79,22 @@ def restart_system(command):
     if os.name == 'nt':
         os.system("shutdown /r /t 1")
     return "Initiating system reboot, Sir. I will be back shortly."
+
+@register_skill(["switch to", "change persona", "activate mode"])
+def switch_persona(command):
+    """
+    Switches between AI personas: Jarvis, Casual, Focus.
+    Example: "switch to focus mode"
+    """
+    cmd = command.lower()
+    if "jarvis" in cmd:
+        settings_manager.set("persona", "jarvis")
+        return "Sir, I have re-initialized the primary JARVIS neural protocols. How may I assist?"
+    elif "casual" in cmd:
+        settings_manager.set("persona", "casual")
+        return "Alright! I'm in casual mode now. What's on your mind?"
+    elif "focus" in cmd:
+        settings_manager.set("persona", "focus")
+        return "Productivity mode active. Eliminate distractions. State your objectives."
+    
+    return "Sir, that persona is not in my database. Available modes: Jarvis, Casual, and Focus."

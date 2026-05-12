@@ -2,6 +2,12 @@ import ollama
 import sys
 from settings import settings_manager
 
+PERSONAS = {
+    "jarvis": "You are JARVIS, Tony Stark's AI. Be concise, witty, and call the user 'Sir'. Always refer to the user as 'Sir'.",
+    "casual": "You are a friendly, laid-back assistant. Keep it conversational, brief, and helpful.",
+    "focus": "You are a strict productivity coach. Be direct, efficient, and avoid any small talk. Focus on high performance.",
+}
+
 def ask_ai(prompt, history):
     """
     JARVIS Neural Engine Controller.
@@ -10,7 +16,8 @@ def ask_ai(prompt, history):
     try:
         # Load dynamic settings
         model = settings_manager.get("model", "llama3")
-        sys_prompt = settings_manager.get("system_prompt", "You are Jarvis, an advanced AI assistant created by Tony Stark. Be helpful, concise, and professional.")
+        persona_key = settings_manager.get("persona", "jarvis").lower()
+        sys_prompt = PERSONAS.get(persona_key, PERSONAS["jarvis"])
 
         response = ollama.chat(
             model=model,
@@ -42,7 +49,8 @@ def stream_ai(prompt, history):
     """
     try:
         model = settings_manager.get("model", "llama3")
-        sys_prompt = settings_manager.get("system_prompt", "You are Jarvis, an advanced AI assistant created by Tony Stark. Be helpful, concise, and professional.")
+        persona_key = settings_manager.get("persona", "jarvis").lower()
+        sys_prompt = PERSONAS.get(persona_key, PERSONAS["jarvis"])
 
         stream = ollama.chat(
             model=model,
