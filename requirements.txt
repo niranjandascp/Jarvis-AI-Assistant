@@ -1,20 +1,25 @@
+# --- JARVIS CORE ---
 flask
 flask-cors
 ollama
-psutil
-pyttsx3
-pyaudio
-requests
-pyinstaller
 waitress
-vosk
-sounddevice
-redis
+requests
+
+# --- VOICE & AUDIO ---
 edge-tts
 pygame
+vosk
+sounddevice
+
+# --- SKILLS ---
 pyautogui
 pdfplumber
 duckduckgo-search
 dateparser
 spotipy
 python-dotenv
+pyperclip
+
+# --- SYSTEM ---
+psutil
+redis

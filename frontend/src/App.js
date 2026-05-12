@@ -100,6 +100,10 @@ function App() {
   useEffect(() => {
     const timer = setTimeout(() => {
         setSystemReady(true);
+        console.log("------------------------------------------");
+        console.log("       JARVIS MARK VII OPERATIONAL        ");
+        console.log(" NEW_FEATURES: Archives, Personas, HUD_TRAY ");
+        console.log("------------------------------------------");
     }, 2000);
     return () => clearTimeout(timer);
   }, []);

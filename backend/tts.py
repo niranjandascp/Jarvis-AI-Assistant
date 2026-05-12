@@ -40,7 +40,7 @@ async def speak_async(text):
     """
     Synthesizes text to speech using edge-tts with dynamic tone detection.
     """
-    output_file = "reply.mp3"
+    output_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "reply.mp3")
     
     # 🧠 Detect Tone
     tone = get_tone(text)
