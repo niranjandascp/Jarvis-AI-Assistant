@@ -3,6 +3,7 @@ import axios from "axios";
 import { gsap } from "gsap";
 import Visualizer from "./components/Visualizer";
 import Particles from "./components/Particles";
+import HistoryPanel from "./components/HistoryPanel";
 import { PlaceholdersAndVanishInput } from "./components/ui/placeholders-and-vanish-input";
 import Lenis from "lenis";
 import "./App.css";
@@ -38,6 +39,9 @@ function App() {
   const [systemReady, setSystemReady] = useState(false);
   const [backendStatus, setBackendStatus] = useState("checking");
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [sessions, setSessions] = useState(
+    JSON.parse(localStorage.getItem('jarvis_sessions') || '[]')
+  );
   
   const chatEndRef = useRef(null);
   const recognitionRef = useRef(null);
@@ -165,6 +169,32 @@ function App() {
     }
   }, [useServerVoice]);
 
+  // --- SESSION MANAGEMENT ---
+  const saveSession = useCallback(() => {
+    if (messages.length <= 1) return; // Don't save empty or intro-only sessions
+    const newSession = { id: Date.now(), messages: [...messages] };
+    const updatedSessions = [newSession, ...sessions].slice(0, 50); // Keep last 50
+    setSessions(updatedSessions);
+    localStorage.setItem('jarvis_sessions', JSON.stringify(updatedSessions));
+    
+    // Reset messages for new session
+    setMessages([
+        { role: "jarvis", text: "New session initialized. Neural Link stable. Waiting for your next directive, Sir." }
+    ]);
+  }, [messages, sessions]);
+
+  const selectSession = (session) => {
+    setMessages(session.messages);
+    gsap.fromTo(".chat-row", { opacity: 0, x: -20 }, { opacity: 1, x: 0, stagger: 0.05, duration: 0.4 });
+  };
+
+  const clearHistory = () => {
+    if (window.confirm("Sir, are you sure you want to purge the session archives? This action is irreversible.")) {
+        setSessions([]);
+        localStorage.removeItem('jarvis_sessions');
+    }
+  };
+
   const [transcript, setTranscript] = useState("");
 
   const toggleListening = async () => {
@@ -277,6 +307,9 @@ function App() {
               <button className={`mode-pill ${useServerVoice ? 'active' : ''}`} onClick={() => setUseServerVoice(!useServerVoice)}>
                 {useServerVoice ? "SRV_VOICE" : "WEB_VOICE"}
               </button>
+              <button className="new-chat-btn" onClick={saveSession}>
+                NEW_LINK
+              </button>
            </div>
         </header>
 
@@ -292,11 +325,11 @@ function App() {
                         </div>
                     </div>
                     <div className="info-module">
-                        <h3>SYSTEM_LOGS</h3>
-                        <div className="log-entries">
-                            <p>[OK] Memory Bank Mounted</p>
-                            <p>[OK] Neural Engine Hot</p>
-                        </div>
+                        <HistoryPanel 
+                            sessions={sessions} 
+                            onSelectSession={selectSession} 
+                            onClearHistory={clearHistory}
+                        />
                     </div>
                 </div>
             </aside>
