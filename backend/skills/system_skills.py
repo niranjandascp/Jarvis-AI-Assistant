@@ -57,3 +57,24 @@ def lock_screen(command):
         return "Systems locked, Sir. Stay safe."
     except:
         return "Sir, the security protocols failed to initialize."
+@register_skill(["volume down", "quieter"])
+def volume_down(command):
+    pyautogui.press("volumedown")
+    return "Decreasing audio output, Sir."
+
+@register_skill(["mute", "silence"])
+def volume_mute(command):
+    pyautogui.press("volumemute")
+    return "Audio output silenced, Sir."
+
+@register_skill(["shutdown system", "power off"])
+def shutdown_system(command):
+    if os.name == 'nt':
+        os.system("shutdown /s /t 1")
+    return "Initiating shutdown sequence, Sir. Goodbye."
+
+@register_skill(["restart system", "reboot"])
+def restart_system(command):
+    if os.name == 'nt':
+        os.system("shutdown /r /t 1")
+    return "Initiating system reboot, Sir. I will be back shortly."

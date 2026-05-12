@@ -28,6 +28,8 @@ graph TD
 - **🌊 Liquid Glass Design**: 40px backdrop-blur, 200% saturation, and interactive spotlights.
 - **🖥️ Native OS Integration**: Frameless window with macOS Traffic Lights (Close, Min, Max).
 - **🎙️ Advanced Voice Hub**: Integrated speech recognition and high-fidelity server-side synthesis.
+- **🎵 Spotify Integration**: Real-time playback control, track searching, and volume management.
+- **📝 Note Archiving**: Securely save and retrieve notes with timestamped data persistence.
 - **🌊 Momentum Scrolling**: Industry-standard smooth scrolling via Lenis.
 - **🐳 Docker Ready**: Optimized multi-stage containerization for instant deployment.
 

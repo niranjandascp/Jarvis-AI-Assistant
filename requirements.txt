@@ -16,3 +16,5 @@ pyautogui
 pdfplumber
 duckduckgo-search
 dateparser
+spotipy
+python-dotenv
