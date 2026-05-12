@@ -2,6 +2,7 @@ import edge_tts
 import asyncio
 import os
 import pygame
+import ollama
 
 # Initialize pygame mixer for audio playback
 try:
@@ -9,11 +10,46 @@ try:
 except Exception as e:
     print(f"Audio Error: Could not initialize mixer ({e})")
 
-async def speak_async(text, voice="en-US-GuyNeural"):
+# Tone-to-Voice mapping
+VOICES = {
+    "calm": "en-US-GuyNeural",
+    "excited": "en-US-AndrewNeural",
+    "urgent": "en-US-AndrewNeural"  # Fallback to Andrew for urgency
+}
+
+def get_tone(text):
     """
-    Synthesizes text to speech using edge-tts and plays it.
+    Uses Ollama to analyze the emotional tone of the text.
+    """
+    try:
+        r = ollama.chat(model="llama3", messages=[{
+            "role": "user",
+            "content": f"Reply ONLY with one word — calm/excited/urgent:\n{text}"
+        }])
+        tone = r['message']['content'].strip().lower()
+        # Clean up any extra punctuation or words LLM might return
+        for word in ["calm", "excited", "urgent"]:
+            if word in tone:
+                return word
+        return "calm" # Default
+    except Exception as e:
+        print(f"Tone Analysis Error: {e}")
+        return "calm"
+
+async def speak_async(text):
+    """
+    Synthesizes text to speech using edge-tts with dynamic tone detection.
     """
     output_file = "reply.mp3"
+    
+    # 🧠 Detect Tone
+    tone = get_tone(text)
+    voice = VOICES.get(tone, "en-US-GuyNeural")
+    try:
+        print(f"Tone detected: {tone} -> Using Voice: {voice}")
+    except UnicodeEncodeError:
+        print(f"Tone detected: {tone} -> Using Voice: {voice}".encode('ascii', 'ignore').decode('ascii'))
+
     try:
         communicate = edge_tts.Communicate(text, voice)
         await communicate.save(output_file)
@@ -29,9 +65,6 @@ async def speak_async(text, voice="en-US-GuyNeural"):
         # Unload to free the file
         pygame.mixer.music.unload()
         
-        # Optional: Clean up the file
-        # os.remove(output_file)
-        
     except Exception as e:
         print(f"Speech Synthesis Error: {e}")
 
@@ -44,7 +77,4 @@ def speak(text):
         # Run the async function in a new event loop
         asyncio.run(speak_async(text))
     except Exception as e:
-        # If we are already in an event loop (e.g. running in an async context), 
-        # we might need to use a different approach like create_task,
-        # but for simple scripts asyncio.run is usually what users want.
         print(f"TTS Execution Error: {e}")
