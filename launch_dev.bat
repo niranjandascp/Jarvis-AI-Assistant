@@ -24,7 +24,7 @@ if errorlevel 1 (
 
 :: Start Flask Backend in the background
 echo 🧠 Starting Neural Backend...
-start /b python backend/server.py
+start /b backend\venv\Scripts\python.exe backend/server.py
 
 :: Navigate to frontend
 cd frontend

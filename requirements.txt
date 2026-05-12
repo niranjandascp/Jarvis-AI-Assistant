@@ -7,3 +7,6 @@ pyaudio
 requests
 pyinstaller
 waitress
+vosk
+sounddevice
+redis

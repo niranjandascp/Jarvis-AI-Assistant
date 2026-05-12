@@ -165,20 +165,59 @@ function App() {
     }
   }, [useServerVoice]);
 
-  const toggleListening = () => {
+  const [transcript, setTranscript] = useState("");
+
+  const toggleListening = async () => {
     if (isListening) {
-      recognitionRef.current?.stop();
-    } else {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (SpeechRecognition) {
-          recognitionRef.current = new SpeechRecognition();
-          recognitionRef.current.onresult = (e) => sendMessage(e.results[0][0].transcript);
-          recognitionRef.current.onend = () => setIsListening(false);
-          recognitionRef.current.start();
-          setIsListening(true);
-      }
+      // In this new mode, we just set the state to false and let the stream close naturally
+      setIsListening(false);
+      return;
+    }
+
+    setIsListening(true);
+    setTranscript("INITIALIZING NEURAL LINK...");
+    console.log("🎤 Starting Backend STT Stream...");
+
+    try {
+      const eventSource = new EventSource("http://127.0.0.1:5000/stt-stream");
+
+      eventSource.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        
+        if (data.error) {
+          console.error("❌ Backend STT Error:", data.error);
+          setTranscript(`⚠️ ERROR: ${data.error.toUpperCase()}`);
+          eventSource.close();
+          setIsListening(false);
+          return;
+        }
+
+        if (data.text) {
+          setTranscript(data.text);
+          if (data.final) {
+            console.log("📝 Final Transcription:", data.text);
+            sendMessage(data.text);
+            eventSource.close();
+            setIsListening(false);
+            setTranscript("");
+          }
+        }
+      };
+
+      eventSource.onerror = () => {
+        console.error("❌ STT Stream Connection Failed");
+        setTranscript("⚠️ ERROR: BACKEND_LINK_LOST");
+        eventSource.close();
+        setIsListening(false);
+      };
+
+    } catch (err) {
+      console.error("Failed to connect to STT stream:", err);
+      setIsListening(false);
     }
   };
+
+
 
   // --- WINDOW CONTROLS ---
   const handleWindowAction = (action) => {
@@ -196,6 +235,14 @@ function App() {
       <div className="window-drag-handle"></div>
       <Particles />
       <div className="scanline"></div>
+
+      {/* --- LIVE TRANSCRIPTION HUD --- */}
+      {transcript && (
+        <div className="transcription-hud">
+           <div className="hud-line"></div>
+           <p><span className="hud-tag">🎤 NEURAL_LINK:</span> {transcript.toUpperCase()}</p>
+        </div>
+      )}
       
       <div 
         className="mouse-spotlight"
@@ -291,6 +338,7 @@ function App() {
         </main>
       </div>
     </div>
+
   );
 }
 

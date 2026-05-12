@@ -13,6 +13,13 @@ import threading
 import requests as http_requests
 import sys
 import os
+import json
+import queue
+import vosk
+import sounddevice as sd
+
+# Suppress Vosk logging
+vosk.SetLogLevel(-1)
 
 # ============================================================
 #  OLLAMA AUTO-START ENGINE
@@ -196,7 +203,7 @@ def ollama_status():
         return jsonify({"ollama": "online"})
     
     # Try to auto-recover
-    print("🔄 Ollama went offline — attempting auto-recovery...")
+    print("Ollama went offline - attempting auto-recovery...")
     recovered = ensure_ollama(max_wait=15)
     return jsonify({
         "ollama": "online" if recovered else "offline",
@@ -206,6 +213,47 @@ def ollama_status():
 @app.route("/get-settings", methods=["GET"])
 def get_settings():
     return jsonify(settings_manager.settings)
+
+@app.route("/stt-stream", methods=["GET"])
+def stt_stream():
+    """Streams real-time transcription from the backend microphone to the frontend."""
+    def generate():
+        model_path = os.path.join(os.path.dirname(__file__), "model")
+        if not os.path.exists(model_path):
+            yield f"data: {json.dumps({'error': 'Vosk Model not found'})}\n\n"
+            return
+
+        model = vosk.Model(model_path)
+        recognizer = vosk.KaldiRecognizer(model, 16000)
+        
+        audio_q = queue.Queue()
+        def callback(indata, frames, time, status):
+            audio_q.put(bytes(indata))
+
+        print("[STT] Backend stream started...")
+        
+        try:
+            with sd.RawInputStream(samplerate=16000, blocksize=4000, dtype='int16',
+                                   channels=1, callback=callback):
+                while True:
+                    data = audio_q.get()
+                    if recognizer.AcceptWaveform(data):
+                        result = json.loads(recognizer.Result())
+                        text = result.get("text", "")
+                        if text:
+                            yield f"data: {json.dumps({'text': text, 'final': True})}\n\n"
+                            break # End stream after one full sentence
+                    else:
+                        partial = json.loads(recognizer.PartialResult())
+                        text = partial.get("partial", "")
+                        if text:
+                            yield f"data: {json.dumps({'text': text, 'final': False})}\n\n"
+        except Exception as e:
+            yield f"data: {json.dumps({'error': str(e)})}\n\n"
+        finally:
+            print("[STT] Backend stream closed.")
+
+    return Response(generate(), mimetype='text/event-stream')
 
 @app.route("/set-model", methods=["POST"])
 def set_model():
