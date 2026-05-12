@@ -1,5 +1,6 @@
 import sys
 import os
+import time
 
 # Add the current directory to sys.path
 sys.path.append(os.path.dirname(__file__))
@@ -17,6 +18,10 @@ def test_command(phrase):
         return False
 
 if __name__ == "__main__":
-    # Test 1: Web Search
-    print("\n[SCENARIO] Testing Web Search")
-    test_command("google what is the price of bitcoin today")
+    # Test: Reminder
+    print("\n[SCENARIO] Testing Reminder")
+    test_command("remind me to check the Arc Reactor in 3 seconds")
+    
+    print("Waiting for reminder to fire...")
+    time.sleep(5)
+    print("Test complete.")

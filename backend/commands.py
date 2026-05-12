@@ -1,13 +1,15 @@
 try:
     from skills.registry import execute_skill
     # Import skills modules relatively
-    from skills import system_skills, clipboard_skills, web_search_skills
+    from skills import system_skills, clipboard_skills, web_search_skills, weather_skills, reminder_skills
 except (ImportError, ValueError):
     try:
         from skills.registry import execute_skill
         import skills.system_skills
         import skills.clipboard_skills
         import skills.web_search_skills
+        import skills.weather_skills
+        import skills.reminder_skills
     except ImportError:
         import sys
         import os
@@ -16,6 +18,8 @@ except (ImportError, ValueError):
         import system_skills
         import clipboard_skills
         import web_search_skills
+        import weather_skills
+        import reminder_skills
 
 def run_command(command):
     """
