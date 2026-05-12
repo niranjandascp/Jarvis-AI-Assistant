@@ -361,7 +361,7 @@ function App() {
                             <div className="vanish-input-container">
                                 <PlaceholdersAndVanishInput
                                     placeholders={PLACEHOLDERS}
-                                    onSubmit={(e) => sendMessage(e.target.value)}
+                                    onSubmit={(val) => sendMessage(val)}
                                 />
                             </div>
                         </div>

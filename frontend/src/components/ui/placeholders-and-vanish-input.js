@@ -90,8 +90,8 @@ export const PlaceholdersAndVanishInput = ({
 
   const handleAction = (e) => {
     if (e) {
-        e.preventDefault();
-        e.stopPropagation();
+      e.preventDefault();
+      e.stopPropagation();
     }
     
     if (!value || animating) return;
@@ -102,7 +102,7 @@ export const PlaceholdersAndVanishInput = ({
     runVanish();
 
     if (onSubmit) {
-      onSubmit({ target: { value: submittedValue } });
+      onSubmit(submittedValue);
     }
   };
 
@@ -136,9 +136,12 @@ export const PlaceholdersAndVanishInput = ({
             value={value}
             onChange={(e) => !animating && setValue(e.target.value)}
             className="placeholders-input"
+            autoFocus
             style={{ 
                 opacity: animating ? 0 : 1,
-                pointerEvents: animating ? 'none' : 'auto'
+                pointerEvents: animating ? 'none' : 'auto',
+                position: 'relative',
+                zIndex: 10
             }}
         />
 
