@@ -1,10 +1,11 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, Tray, Menu, globalShortcut } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 const net = require('net');
 
 let flaskProcess = null;
 let mainWindow = null;
+let tray = null;
 
 // Ensure only one instance runs
 const gotTheLock = app.requestSingleInstanceLock();
@@ -137,6 +138,42 @@ ipcMain.on('window-close', (event) => {
 app.whenReady().then(() => {
     startFlask();
     createWindow();
+
+    // --- SYSTEM TRAY ---
+    const iconPath = path.join(__dirname, '../../icon.png');
+    tray = new Tray(iconPath);
+    
+    const contextMenu = Menu.buildFromTemplate([
+        { label: 'JARVIS_HUD', click: () => { if (mainWindow) mainWindow.show(); } },
+        { type: 'separator' },
+        { label: 'TERMINATE', click: () => { app.quit(); } }
+    ]);
+
+    tray.setToolTip('JARVIS Neural Interface');
+    tray.setContextMenu(contextMenu);
+
+    tray.on('click', () => {
+        if (mainWindow) {
+            mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show();
+        }
+    });
+
+    // --- GLOBAL SHORTCUT (ALT+J) ---
+    globalShortcut.register('Alt+J', () => {
+        if (mainWindow) {
+            if (mainWindow.isVisible() && mainWindow.isFocused()) {
+                mainWindow.hide();
+            } else {
+                mainWindow.show();
+                mainWindow.focus();
+            }
+        }
+    });
+});
+
+app.on('will-quit', () => {
+    // Unregister all shortcuts
+    globalShortcut.unregisterAll();
 });
 
 app.on('window-all-closed', () => {
