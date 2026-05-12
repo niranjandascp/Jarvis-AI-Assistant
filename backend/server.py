@@ -5,7 +5,7 @@ from brain import ask_ai, stream_ai
 from memory import memory_manager
 import memory
 from settings import settings_manager
-import pyttsx3
+import tts
 import subprocess
 import shutil
 import time
@@ -105,25 +105,9 @@ CORS(app)
 print(f"DEBUG: Memory Module Location -> {memory.__file__}")
 
 # --- SERVER-SIDE VOICE ENGINE ---
-engine = None
-try:
-    engine = pyttsx3.init()
-    engine.setProperty('rate', 170)
-except Exception as e:
-    print(f"JARVIS_VOICE: Offline ({e})")
-
-engine_lock = threading.Lock()
-
 def speak_text(text):
-    if not engine: return
-    def run():
-        try:
-            with engine_lock:
-                engine.say(text)
-                engine.runAndWait()
-        except:
-            pass
-    threading.Thread(target=run, daemon=True).start()
+    """Asynchronous voice feedback to avoid blocking the API response."""
+    threading.Thread(target=tts.speak, args=(text,), daemon=True).start()
 
 @app.route("/chat", methods=["POST"])
 def chat():

@@ -10,3 +10,5 @@ waitress
 vosk
 sounddevice
 redis
+edge-tts
+pygame
