@@ -1,5 +1,6 @@
-from flask import Flask, request, jsonify, Response
+from flask import Flask, request, jsonify, Response, session
 from flask_cors import CORS
+import pdfplumber
 from commands import run_command
 from brain import ask_ai, stream_ai
 from memory import memory_manager
@@ -99,7 +100,8 @@ def ensure_ollama(max_wait=30):
 
 # --- JARVIS CORE SERVER ---
 app = Flask(__name__)
-CORS(app) 
+app.secret_key = "STARK_INDUSTRIES_ENCRYPTION_KEY" # Needed for sessions
+CORS(app, supports_credentials=True) 
 
 # DIAGNOSTIC: Print exactly where we are importing memory from
 print(f"DEBUG: Memory Module Location -> {memory.__file__}")
@@ -128,6 +130,11 @@ def chat():
 
         # 2. Context retrieval
         context = memory_manager.get_memory(limit=10)
+        
+        # 2.5 Document Context (if uploaded)
+        doc_context = session.get('doc_context', "")
+        if doc_context:
+            context.insert(0, {"role": "system", "content": f"DOCUMENT CONTEXT: {doc_context}"})
 
         # 3. AI Inference
         reply = ask_ai(user_msg, context)
@@ -153,6 +160,11 @@ def stream():
         
         # 1. Context retrieval
         context = memory_manager.get_memory(limit=10)
+        
+        # 1.5 Document Context
+        doc_context = session.get('doc_context', "")
+        if doc_context:
+            context.insert(0, {"role": "system", "content": f"DOCUMENT CONTEXT: {doc_context}"})
 
         def generate():
             full_reply = ""
@@ -251,6 +263,34 @@ def set_model():
         return jsonify({"ok": True, "model": new_model})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route('/upload', methods=['POST'])
+def upload_doc():
+    """Extracts text from uploaded PDF and stores it in the session context."""
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+    
+    f = request.files['file']
+    if f.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+
+    try:
+        text = ""
+        with pdfplumber.open(f) as pdf:
+            for page in pdf.pages:
+                text += page.extract_text() or ""
+        
+        # Trim to context window (approx 8k chars)
+        session['doc_context'] = text[:8000]
+        return jsonify({"ok": True, "chars": len(text)})
+    except Exception as e:
+        return jsonify({"error": f"PDF Analysis Error: {str(e)}"}), 500
+
+@app.route('/clear-doc', methods=['POST'])
+def clear_doc():
+    """Clears the document context from the session."""
+    session.pop('doc_context', None)
+    return jsonify({"ok": True, "message": "Document context cleared."})
 
 if __name__ == "__main__":
     from waitress import serve

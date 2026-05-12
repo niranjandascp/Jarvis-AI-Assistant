@@ -13,3 +13,5 @@ redis
 edge-tts
 pygame
 pyautogui
+pdfplumber
+duckduckgo-search

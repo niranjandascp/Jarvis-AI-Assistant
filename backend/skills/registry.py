@@ -24,7 +24,11 @@ def execute_skill(command):
     Returns the skill response if found, else None.
     """
     cmd_lower = command.lower()
-    for kw, fn in SKILLS.items():
+    
+    # Sort keywords by length (longest first) to ensure specific matches win
+    sorted_keywords = sorted(SKILLS.keys(), key=len, reverse=True)
+    
+    for kw in sorted_keywords:
         if kw in cmd_lower:
-            return fn(command)
+            return SKILLS[kw](command)
     return None
